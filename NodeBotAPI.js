@@ -98,17 +98,3 @@ exports.sendMessage = function (chat, text, keyboard, web_preview) {
     https.get(APIURL+TOKEN+'/sendMessage?chat_id='+chat+'&text='+encodeURIComponent(text)+'&reply_markup='+encodeURIComponent(keyboard)+'&disable_web_page_preview='+web_preview);
   }
 };
-
-exports.sendPhoto = function (chat, photo, keyboard, text) {
-  if (keyboard == undefined) {
-    https.get(APIURL+TOKEN+'/sendPhoto?chat_id='+chat+'&photo='+encodeURIComponent(photo));
-    setTimeout(function () {
-      https.get(APIURL+TOKEN+'/sendMessage?chat_id='+chat+'&text='+encodeURIComponent(text))
-    }, 300);
-  } else {
-    https.get(APIURL+TOKEN+'/sendPhoto?chat_id='+chat+'&photo='+encodeURIComponent(photo)+'&reply_markup='+encodeURIComponent(keyboard));
-    setTimeout(function () {
-      https.get(APIURL+TOKEN+'/sendMessage?chat_id='+chat+'&text='+encodeURIComponent(text))
-    }, 300);
-  }
-};
