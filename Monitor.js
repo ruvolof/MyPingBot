@@ -7,26 +7,32 @@ var SERVERSFILE = __dirname + '/servers.csv';
 var servers_list = {};
 
 exports.addToServersList = function (host, username, chat_id) {
-  dns.lookup(host, function(err, address, family) {
-    if (err) {
-      var s = "Couldn't resolve hostname " + host + ". Skipping.";
-      nba.sendMessage(chat_id, s.toString('utf8'));
-    }
-    else {
-      var s = host + ',' + username + ',' + chat_id + '\n';
-      fs.appendFile(SERVERSFILE, s, function (err) {
-        if (err) {
-          var s = 'An error occurred while adding your host. Please, report a bug on GitHub.';
-          nba.sendMessage(chat_id, s.toString('utf8'));
-        }
-        else {
-          var s = 'Host correctly added. You\'ll get a notification if it goes down.';
-          nba.sendMessage(chat_id, s.toString('utf8'));
-          loadServersList();
-        }
-      });
-    }
-  });
+  if (servers_list.hasOwnProperty(host) && servers_list[host].chat_id == chat_id) {
+    var s = "You're already monitoring " + host + ".";
+    nba.sendMessage(chat_id, s.toString('utf8'));
+  }
+  else {
+    dns.lookup(host, function(err, address, family) {
+      if (err) {
+        var s = "Couldn't resolve hostname " + host + ". Skipping.";
+        nba.sendMessage(chat_id, s.toString('utf8'));
+      }
+      else {
+        var s = host + ',' + username + ',' + chat_id + '\n';
+        fs.appendFile(SERVERSFILE, s, function (err) {
+          if (err) {
+            var s = 'An error occurred while adding your host. Please, report a bug on GitHub.';
+            nba.sendMessage(chat_id, s.toString('utf8'));
+          }
+          else {
+            var s = 'Host correctly added. You\'ll get a notification if it goes down.';
+            nba.sendMessage(chat_id, s.toString('utf8'));
+            loadServersList();
+          }
+        });
+      }
+    });
+  }
 }
 
 function loadServersList() {

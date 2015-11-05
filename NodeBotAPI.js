@@ -42,7 +42,6 @@ function restartUpdatesLoop(){
     clearInterval(interval_cur);
   }
   interval_cur = setInterval( function() {
-    console.log('Issued periodic get request.');
     getUpdates(msg_id, interval_cur);
   }, def_interval);
   getUpdates(msg_id, interval_cur);
