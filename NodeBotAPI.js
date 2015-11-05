@@ -63,7 +63,7 @@ function getUpdates(offset, interval_cur) {
       if (r['ok'] == false) {
         console.log('Error handling the getUpdates request.');
       } else if (r['result'].length == 0){
-        console.log('No messages to handle.');
+        return;
       } else {
         if (interval_cur != undefined) {
           clearInterval(interval_cur);
@@ -81,7 +81,6 @@ function getUpdates(offset, interval_cur) {
 
 exports.startUpdatesLoop = function () {
   interval_cur = setInterval( function() {
-    console.log('Issued periodic GET request.');
     getUpdates(msg_id, interval_cur);
   }, def_interval);
   getUpdates(msg_id, interval_cur);
