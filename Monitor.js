@@ -3,7 +3,7 @@ var dns = require('dns');
 var nba = require('./NodeBotAPI.js');
 var ping = require('./node_modules/ping');
 
-var SERVERSFILE = 'servers.csv';
+var SERVERSFILE = __dirname + '/servers.csv';
 var servers_list = {};
 
 exports.addToServersList = function (host, username, chat_id) {
@@ -14,7 +14,7 @@ exports.addToServersList = function (host, username, chat_id) {
     }
     else {
       var s = host + ',' + username + ',' + chat_id + '\n';
-      fs.appendFile(__dirname + '/' + SERVERSFILE, s, function (err) {
+      fs.appendFile(SERVERSFILE, s, function (err) {
         if (err) {
           var s = 'An error occurred while adding your host. Please, report a bug on GitHub.';
           nba.sendMessage(chat_id, s.toString('utf8'));
@@ -31,23 +31,30 @@ exports.addToServersList = function (host, username, chat_id) {
 
 function loadServersList() {
   console.log('Loading servers list.');
-
   servers_list = {};
 
-  var server_file = require('readline').createInterface({
-    input: fs.createReadStream(__dirname + '/' + SERVERSFILE),
-    terminal: false
-  });
+  fs.stat(SERVERSFILE, function (err, stat) {
+    if (err == null) {
+      var server_file = require('readline').createInterface({
+        input: fs.createReadStream(SERVERSFILE),
+        terminal: false
+      });
 
-  server_file.on('line', function (line) {
-    var s = line.split(',');
-    servers_list[s[0]] = {
-      username: s[1],
-      chat_id: s[2],
-      alive: true
+      server_file.on('line', function (line) {
+        var s = line.split(',');
+        servers_list[s[0]] = {
+          username: s[1],
+          chat_id: s[2],
+          alive: true
+        }
+        console.log(s[0] + ' imported.');
+      });
     }
-    console.log(s[0] + ' imported.');
-  });
+    else {
+      console.log(SERVERSFILE + ' not found. Skipping.');
+    }
+  })
+
 }
 
 function checkServers() {
