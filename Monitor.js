@@ -1,14 +1,32 @@
+var fs = require('fs');
 var nba = require('./NodeBotAPI.js');
 var ping = require('./node_modules/ping');
 
 var SERVERSFILE = 'servers.csv';
 var servers_list = {};
 
-exports.loadServersList = function () {
-  console.log('Loading servers list...');
+exports.addToServersList = function (host, username, chat_id) {
+  var s = host + ',' + username + ',' + chat_id + '\n';
+  fs.appendFile(__dirname + '/' + SERVERSFILE, s, function (err) {
+  if (err) {
+    var s = 'An error occurred while adding your host. Please, report a bug on GitHub.';
+    nba.sendMessage(chat_id, s.toString('utf8'));
+  }
+  else {
+    var s = 'Host correctly added. You\'ll get a notification if it goes down.';
+    nba.sendMessage(chat_id, s.toString('utf8'));
+    loadServersList();
+  }
+});
+}
+
+function loadServersList() {
+  console.log('Loading servers list.');
+
+  servers_list = {};
 
   var server_file = require('readline').createInterface({
-    input: require('fs').createReadStream(__dirname + '/' + SERVERSFILE),
+    input: fs.createReadStream(__dirname + '/' + SERVERSFILE),
     terminal: false
   });
 
@@ -43,5 +61,7 @@ function checkServers() {
 }
 
 exports.startMonitor = function () {
+  loadServersList();
+  checkServers();
   setInterval(checkServers, 300000);
 }
