@@ -1,13 +1,14 @@
 var nba = require('./NodeBotAPI.js');
 var ping = require('./node_modules/ping');
 
+var SERVERSFILE = 'servers.csv';
 var servers_list = {};
 
 exports.loadServersList = function () {
   console.log('Loading servers list...');
 
   var server_file = require('readline').createInterface({
-    input: require('fs').createReadStream(__dirname + '/servers.csv'),
+    input: require('fs').createReadStream(__dirname + '/' + SERVERSFILE),
     terminal: false
   });
 
@@ -18,12 +19,11 @@ exports.loadServersList = function () {
       chat_id: s[2],
       alive: true
     }
-    console.log(s[0]);
+    console.log(s[0] + ' imported.');
   });
 }
 
 function checkServers() {
-  console.log('Checking servers.');
   var hosts = Object.keys(servers_list);
   hosts.forEach(function(host) {
     ping.promise.probe(host)
