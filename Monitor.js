@@ -69,14 +69,18 @@ function checkServers() {
     ping.promise.probe(host)
         .then (function (res) {
           if (res.alive) {
+            if (servers_list[host].alive == false) {
+              var s = "Host " + host + " is back online.";
+              nba.sendMessage(servers_list[host].chat_id, s.toString('utf8'));
+            }
             servers_list[host].alive = true;
           } else {
             if (servers_list[host].alive == true) {
-              servers_list[host].alive = false;
               var s = "Host " + host + " is dead.";
               console.log(s + " Sending notification to " + servers_list[host].username + ": " + servers_list[host].chat_id);
               nba.sendMessage(servers_list[host].chat_id, s.toString('utf8'));
             }
+            servers_list[host].alive = false;
           }
         });
   });
