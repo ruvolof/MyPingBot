@@ -1,3 +1,4 @@
+var dns = require('dns');
 var nba = require('./NodeBotAPI.js');
 var monitor = require('./Monitor.js');
 var ping = require('./node_modules/ping');
@@ -13,8 +14,8 @@ exports.processMessage = function (update_id, msg) {
       return;
     }
   }
-
-  if (/^\/ping/.test(msg.text)) {
+  // ping HOST
+  if (/^\/ping\s/.test(msg.text)) {
     var re_args = /^\/ping\s+([\.:\/a-z0-9]+)$/g;
     var m = re_args.exec(msg.text);
 
@@ -35,7 +36,10 @@ exports.processMessage = function (update_id, msg) {
       var s = "/ping needs a parameter.";
       nba.sendMessage(msg.from.id, s.toString('utf8'));
     }
-  } else if (/^\/monitor/.test(msg.text)) {
+  }
+
+  // monitor HOST
+  else if (/^\/monitor\s/.test(msg.text)) {
     var re_args = /^\/monitor\s+([\.:\/a-z0-9]+)$/g;
     var m = re_args.exec(msg.text);
 
@@ -49,6 +53,48 @@ exports.processMessage = function (update_id, msg) {
     else {
       var s = "/monitor needs a parameter.";
       nba.sendMessage(msg.from.id, s.toString('utf8'));
+    }
+  }
+
+  // host HOST
+  else if (/^\/host\s/.test(msg.text)) {
+    var re_args = /^\/host\s+([\.:\/a-z0-9]+)$/g;
+    var m = re_args.exec(msg.text);
+
+    if (/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(m[1])) {
+      var host = m[1];
+      dns.reverse(host, function (err, hostnames) {
+        if (err) {
+          var s = "Unable to reverse resolve " + host + ".";
+          console.log(s);
+          nba.sendMessage(msg.from.id, s.toString('utf8'));
+        }
+        else {
+          var s = '';
+          hostnames.forEach(function(hostname) {
+            s += host + " resolved to " + hostname + "\n";
+          });
+          nba.sendMessage(msg.from.id, s.toString('utf8'));
+        }
+      })
+    } else {
+      var host = m[1];
+      var options = {
+        all: true
+      };
+      dns.lookup(host, options, function (err, addresses) {
+        if (err) {
+          var s = "Couldn't resolve hostname " + host + ". Skipping.";
+          nba.sendMessage(msg.from.id, s.toString('utf8'));
+        }
+        else {
+          var s = '';
+          addresses.forEach(function (address) {
+            s += host + " has IPv" + address.family + " address " + address.address + "\n";
+          });
+          nba.sendMessage(msg.from.id, s.toString('utf8'));
+        }
+      });
     }
   }
 }
