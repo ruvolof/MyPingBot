@@ -3,12 +3,29 @@ var dns = require('dns');
 var nba = require('./NodeBotAPI.js');
 var ping = require('./node_modules/ping');
 
+var MAX_MON = 10;
 var SERVERSFILE = __dirname + '/servers.csv';
 var servers_list = {};
 
+function countHostsPerUser(user_id) {
+  var i = 0;
+  Object.keys(servers_list).forEach(function (entry) {
+    if (servers_list[entry].chat_id == user_id) {
+      i++;
+    }
+  });
+  return i;
+}
+
 exports.addToServersList = function (host, username, chat_id) {
+  // Checking if the user is already monitoring the host.
   if (servers_list.hasOwnProperty(host) && servers_list[host].chat_id == chat_id) {
     var s = "You're already monitoring " + host + ".";
+    nba.sendMessage(chat_id, s.toString('utf8'));
+  }
+  // Checking if the user is monitoring more than MAX_MON hosts.
+  else if (countHostsPerUser(chat_id) >= MAX_MON) {
+    var s = "You're already monitoring " + MAX_MON + " or more hosts. Maximum reached.";
     nba.sendMessage(chat_id, s.toString('utf8'));
   }
   else {
