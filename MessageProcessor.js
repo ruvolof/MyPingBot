@@ -58,7 +58,7 @@ exports.processMessage = function (update_id, msg) {
 
   // host HOST
   else if (/^\/host\s/.test(msg.text)) {
-    var re_args = /^\/host\s+([\.:\/a-z0-9]+)$/g;
+    var re_args = /^\/host\s+([\.:\/a-z0-9]+)$/ig;
     var m = re_args.exec(msg.text);
 
     if (/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(m[1])) {
