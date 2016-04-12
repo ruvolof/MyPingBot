@@ -69,7 +69,7 @@ function loadServersList() {
           username: s[1],
           chat_id: s[2],
           alive: true
-        }
+        };
         console.log(s[0] + ' imported.');
       });
     }
@@ -78,6 +78,27 @@ function loadServersList() {
     }
   })
 
+}
+
+function delayedCheck(host) {
+    ping.promise.probe(host)
+        .then (function (res) {
+            if (!res.alive) {
+                if (servers_list[host].alive == true) {
+                    var s = "Host " + host + " is dead.";
+                    console.log(s + " Sending notification to " + servers_list[host].username + ": " + servers_list[host].chat_id);
+                    nba.sendMessage(servers_list[host].chat_id, s.toString('utf8'));
+                }
+                servers_list[host].alive = false;
+            }
+            else {
+                if (servers_list[host].alive == false) {
+                    var s = "Host " + host + " is back online.";
+                    nba.sendMessage(servers_list[host].chat_id, s.toString('utf8'));
+                }
+                servers_list[host].alive = true;
+            }
+        });
 }
 
 function checkServers() {
@@ -92,12 +113,10 @@ function checkServers() {
             }
             servers_list[host].alive = true;
           } else {
-            if (servers_list[host].alive == true) {
-              var s = "Host " + host + " is dead.";
-              console.log(s + " Sending notification to " + servers_list[host].username + ": " + servers_list[host].chat_id);
-              nba.sendMessage(servers_list[host].chat_id, s.toString('utf8'));
-            }
-            servers_list[host].alive = false;
+            // Delaying checks to avoid false positive
+            setTimeout(function () {
+                delayedCheck(host);
+            }, 15000);
           }
         });
   });
@@ -107,4 +126,4 @@ exports.startMonitor = function () {
   loadServersList();
   checkServers();
   setInterval(checkServers, 300000);
-}
+};
