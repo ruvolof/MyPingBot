@@ -37,6 +37,50 @@ msg_id = 0;
 def_interval = 11000;
 interval_cur = undefined;
 
+function emptyUpdates() {
+    https.get(APIURL+TOKEN+'/getUpdates?offset=-1', function (res) {
+        var body = '';
+        var r;
+        res.on('data', function (data) {
+            body += data;
+        })
+
+        res.on('end', function () {
+            r = JSON.parse(body);
+            if (r.ok == false) {
+                console.error('Error handling the getUpdates request.');
+            }
+            else {
+                if (r.result.length == 0) {
+                    console.log("Backlog empty.");
+                }
+                else {
+                    msg_id = r.result[0].update_id;
+                    msg_id++;
+                    https.get(APIURL+TOKEN+'/getUpdates?offset='+msg_id, function (res) {
+                        var body = '';
+                        var r;
+                        res.on('data', function (data) {
+                            body += data;
+                        })
+
+                        res.on('end', function () {
+                            r = JSON.parse(body);
+                            if (r.ok == false) {
+                                console.error("Error while trying to empty the backlog.")
+                            }
+                            else {
+                                console.log("Message backlog is now empty.");
+                            }
+                        });
+                    })
+                }
+            }
+            restartUpdatesLoop();
+        })
+    })
+}
+
 function restartUpdatesLoop(){
   if (interval_cur != undefined) {
     clearInterval(interval_cur);
@@ -59,30 +103,27 @@ function getUpdates(offset, interval_cur) {
     res.on('end', function () {
       r = JSON.parse(body);
 
-      if (r['ok'] == false) {
+      if (r.ok == false) {
         console.log('Error handling the getUpdates request.');
-      } else if (r['result'].length == 0){
+      } else if (r.result.length == 0){
         return;
       } else {
         if (interval_cur != undefined) {
           clearInterval(interval_cur);
           interval_cur = undefined;
         }
-        msg_id = r['result'][0]['update_id'];
+        msg_id = r.result[0].update_id;
         msg_id++;
         restartUpdatesLoop();
-        var current_msg = r['result'][0]['message'];
-        mp.processMessage(r['result'][0]['update_id'], current_msg);
+        var current_msg = r.result[0].message;
+        mp.processMessage(r.result[0].update_id, current_msg);
       }
     })
   })
 }
 
 exports.startUpdatesLoop = function () {
-  interval_cur = setInterval( function() {
-    getUpdates(msg_id, interval_cur);
-  }, def_interval);
-  getUpdates(msg_id, interval_cur);
+    emptyUpdates();
 };
 
 exports.sendMessage = function (chat, text, keyboard, web_preview) {

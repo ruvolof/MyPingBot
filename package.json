@@ -1,6 +1,7 @@
 {
   "name": "MyPingBot",
   "dependencies": {
-    "ping": "*"
+    "ping": "*",
+    "jsonfile": "*"
   }
 }
