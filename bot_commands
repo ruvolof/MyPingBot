@@ -1,1 +1,4 @@
-help - Show help message.
+ping - ping HOST
+host - show HOST address or reverse resolve an IP
+monitor - check if HOST is alive every 5 minutes
+unmonitor - stop monitoring HOST
