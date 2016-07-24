@@ -97,6 +97,20 @@ exports.processMessage = function (update_id, msg) {
         }
     }
 
+    // Retrieve list of monitored server
+    else if (/^\/listmonitor\s*$/.test(msg.text))   {
+        var hosts = Object.keys(servers_list[msg.from.id].hosts);
+        var s;
+        if (hosts.length == 0) {
+            s = "You're not monitoring any server."
+        }
+        else {
+            s = hosts.join("\n");
+        }
+
+        nba.sendMessage(msg.from.id, s.toString('utf8'));
+    }
+
     // host HOST
     else if (/^\/host\s*/.test(msg.text)) {
         var re_args = /^\/host\s+([\.:\/a-z0-9]+)$/ig;

@@ -1,7 +1,7 @@
-MyPingBot is a free and opensource software.
-
-You can find its source code on Github at https://github.com/ruvolof/MyPingBot.
-
 MyPingBot can /monitor your server and send you a notification when and if it goes offline.
 
 It also has other useful command like /ping, /host or /checkport.
+
+MyPingBot is a free and opensource software.
+
+You can find its source code on Github at https://github.com/ruvolof/MyPingBot.

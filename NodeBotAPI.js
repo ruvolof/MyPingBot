@@ -128,7 +128,7 @@ exports.startUpdatesLoop = function () {
 
 exports.sendMessage = function (chat, text, keyboard, web_preview) {
   if (web_preview == undefined) {
-    web_preview = false;
+    web_preview = true;
   }
 
   if (keyboard == undefined) {
