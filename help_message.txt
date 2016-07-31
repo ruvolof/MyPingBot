@@ -11,3 +11,8 @@ Commands:
 /unmonitor HOST Remove HOST from your monitor list.
 /listmonitor    List all hosts in your monitor list.
 /checkport HOST PORT    Check if PORT is open on HOST.
+
+Restrictions:
+
+- You're allowed to send one message every 5 seconds.
+- You're allowed to monitor up to 10 hosts.
