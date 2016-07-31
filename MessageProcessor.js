@@ -40,7 +40,7 @@ exports.processMessage = function (update_id, msg) {
 
     // help
     if (/^\/help\s*$/.test(msg.text)) {
-        fs.readFile('help_message.txt', function (err, data) {
+        fs.readFile(__dirname + '/help_message.txt', function (err, data) {
             if (err) {
                 console.log(err);
             }
