@@ -26,7 +26,7 @@ exports.getMe = function (f) {
         };
         f(botData);
       } else {
-        console.log('Error handling the getMe request.');
+        console.log('getMe: '+r.error_code+': '+r.description);
         return false;
       }
     })
@@ -48,7 +48,7 @@ function emptyUpdates() {
         res.on('end', function () {
             r = JSON.parse(body);
             if (r.ok == false) {
-                console.error('Error handling the getUpdates request.');
+                console.error('getUpdates: '+r.error_code+': '+r.description);
             }
             else {
                 if (r.result.length == 0) {
@@ -67,7 +67,7 @@ function emptyUpdates() {
                         res.on('end', function () {
                             r = JSON.parse(body);
                             if (r.ok == false) {
-                                console.error("Error while trying to empty the backlog.")
+                                console.error('emptyUpdates: '+r.error_code+': '+r.description);
                             }
                             else {
                                 console.log("Message backlog is now empty.");
@@ -90,6 +90,7 @@ function restartUpdatesLoop(){
   }, def_interval);
   getUpdates(msg_id, interval_cur);
 }
+
 function getUpdates(offset, interval_cur) {
   https.get(APIURL+TOKEN+'/getUpdates?offset='+offset+'&timeout=10', function (res) {
     var body = '';
@@ -103,7 +104,7 @@ function getUpdates(offset, interval_cur) {
       r = JSON.parse(body);
 
       if (r.ok == false) {
-        console.log('Error handling the getUpdates request.');
+        console.log('getUpdates: '+r.error_code+': '+r.description);
       } else if (r.result.length == 0){
 
       } else {
