@@ -1,0 +1,13 @@
+MyPingBot is a free and opensource software.
+
+You can find its source code on Github at https://github.com/ruvolof/MyPingBot. Please, report any bug on Github.
+
+Commands:
+
+/help   Show this help message.
+/ping HOST  Ping HOST.
+/host   HOST    If HOST is an hostname, resolve its address, if it's an IP reverse resolve it.
+/monitor HOST   Ping HOST every 5 minutes and send an alert if it's down.
+/unmonitor HOST Remove HOST from your monitor list.
+/listmonitor    List all hosts in your monitor list.
+/checkport HOST PORT    Check if PORT is open on HOST.

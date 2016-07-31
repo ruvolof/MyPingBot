@@ -1,5 +1,6 @@
 var dns = require('dns');
 var net = require('net');
+var fs = require('fs');
 var nba = require('./NodeBotAPI.js');
 var monitor = require('./Monitor.js');
 var ping = require('./node_modules/ping');
@@ -37,8 +38,20 @@ exports.processMessage = function (update_id, msg) {
         }
     }
 
+    // help
+    if (/^\/help\s*$/.test(msg.text)) {
+        fs.readFile('help_message.txt', function (err, data) {
+            if (err) {
+                console.log(err);
+            }
+            else {
+                nba.sendMessage(msg.from.id, data.toString('utf8'));
+            }
+        });
+    }
+
     // ping HOST
-    if (/^\/ping\s*/.test(msg.text)) {
+    else if (/^\/ping\s*/.test(msg.text)) {
         var re_args = /^\/ping\s+([\.:\/a-z0-9]+)$/g;
         var m = re_args.exec(msg.text);
 
