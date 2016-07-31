@@ -11,7 +11,7 @@ servers_list = monitor.servers_list;
 exports.processMessage = function (update_id, msg) {
     console.log('Processing message '+update_id+', message id '+msg.message_id+ ', from '+msg.from.username+' '+msg.from.id);
 
-    var s, re_args, m, host, username, chat_id;
+    var s, re_args, m, host, username, chat_id, hosts;
 
     if (config.maintenance) {
         if (config.testers.indexOf(msg.from.id) == -1) {
@@ -85,6 +85,12 @@ exports.processMessage = function (update_id, msg) {
             host = m[1];
             username = msg.from.username;
             chat_id = msg.from.id;
+
+            if (m[1] == "localhost" || m[1] == "127.0.0.1") {
+                s = "Won't monitor localhost. Skipping.";
+                nba.sendMessage(msg.from.id, s.toString('utf8'));
+                return;
+            }
 
             monitor.addToServersList(host, username, chat_id);
         }
