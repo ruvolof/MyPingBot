@@ -13,7 +13,7 @@ exports.getMe = function (f) {
 
     res.on('data', function (data) {
       body += data;
-    })
+    });
 
     res.on('end', function() {
       r = JSON.parse(body);
@@ -33,9 +33,9 @@ exports.getMe = function (f) {
   })
 };
 
-msg_id = 0;
-def_interval = 11000;
-interval_cur = undefined;
+var msg_id = 0;
+var def_interval = 11000;
+var interval_cur = undefined;
 
 function emptyUpdates() {
     https.get(APIURL+TOKEN+'/getUpdates?offset=-1', function (res) {
@@ -43,7 +43,7 @@ function emptyUpdates() {
         var r;
         res.on('data', function (data) {
             body += data;
-        })
+        });
 
         res.on('end', function () {
             r = JSON.parse(body);
@@ -62,7 +62,7 @@ function emptyUpdates() {
                         var r;
                         res.on('data', function (data) {
                             body += data;
-                        })
+                        });
 
                         res.on('end', function () {
                             r = JSON.parse(body);
@@ -89,8 +89,7 @@ function restartUpdatesLoop(){
     getUpdates(msg_id, interval_cur);
   }, def_interval);
   getUpdates(msg_id, interval_cur);
-};
-
+}
 function getUpdates(offset, interval_cur) {
   https.get(APIURL+TOKEN+'/getUpdates?offset='+offset+'&timeout=10', function (res) {
     var body = '';
@@ -98,7 +97,7 @@ function getUpdates(offset, interval_cur) {
 
     res.on('data', function (data) {
       body += data;
-    })
+    });
 
     res.on('end', function () {
       r = JSON.parse(body);
@@ -106,7 +105,7 @@ function getUpdates(offset, interval_cur) {
       if (r.ok == false) {
         console.log('Error handling the getUpdates request.');
       } else if (r.result.length == 0){
-        return;
+
       } else {
         if (interval_cur != undefined) {
           clearInterval(interval_cur);

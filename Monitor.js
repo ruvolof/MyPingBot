@@ -16,77 +16,74 @@ function hasReachedMax(user_id) {
         if (servers_list[user_id].hosts.hasOwnProperty(key)) {
             i++;
         }
-    })
-    if (i >= MAX_MON) {
-        return true;
-    }
-    else {
-        return false;
-    }
+    });
+    return i >= MAX_MON;
 }
 
 exports.addToServersList = function (host, username, chat_id) {
+    var s;
     // Checking if the user is already monitoring the host.
     if (servers_list[chat_id].hosts.hasOwnProperty(host)) {
-        var s = "You're already monitoring " + host + ".";
+        s = "You're already monitoring " + host + ".";
         nba.sendMessage(chat_id, s.toString('utf8'));
     }
     // Checking if the user is monitoring more than MAX_MON hosts.
     else if (hasReachedMax(chat_id)) {
-        var s = "You're already monitoring " + MAX_MON + " hosts. Maximum reached.";
+        s = "You're already monitoring " + MAX_MON + " hosts. Maximum reached.";
         nba.sendMessage(chat_id, s.toString('utf8'));
     }
     else {
-        dns.lookup(host, function(err, address, family) {
+        dns.lookup(host, function(err) {
             if (err) {
-                var s = "Couldn't resolve hostname " + host + ". Skipping.";
+                s = "Couldn't resolve hostname " + host + ". Skipping.";
                 nba.sendMessage(chat_id, s.toString('utf8'));
             }
             else {
-                servers_list[chat_id].hosts[host] = {alive: true}
+                servers_list[chat_id].hosts[host] = {alive: true};
                 jsonfile.writeFile(SERVERSFILE_PATH, servers_list, {spaces: 4}, function (err) {
                     if (err) {
                         console.error(err.message);
-                        var s = "Your host has been added, but an error occurred while storing the data in case of a reboot of the the bot.";
+                        s = "Your host has been added, but an error occurred while storing the data in case of a reboot of the the bot.";
                         nba.sendMessage(chat_id, s.toString('utf8'));
                     }
                     else {
-                        var s = "Host added correctly. You'll get a notification if it goes down.";
+                        s = "Host added correctly. You'll get a notification if it goes down.";
                         nba.sendMessage(chat_id, s.toString('utf8'));
                     }
                 })
             }
         });
     }
-}
+};
 
 exports.removeFromServersList = function (host, username, chat_id) {
+    var s;
     if (servers_list[chat_id].hosts.hasOwnProperty(host)) {
         delete servers_list[chat_id].hosts[host];
         jsonfile.writeFile(SERVERSFILE_PATH, servers_list, {spaces: 4}, function (err) {
             if (err) {
                 console.log(err.message);
-                var s = "Host correctly removed. But an error occurred while storing this preference. It might get minitored again upun reboot.";
+                s = "Host correctly removed. But an error occurred while storing this preference. It might get minitored again upun reboot.";
                 nba.sendMessage(chat_id, s.toString('utf8'));
             }
             else {
-                var s = "Host correctly removed.";
+                s = "Host correctly removed.";
                 nba.sendMessage(chat_id, s.toString('utf8'));
             }
         })
     }
     else {
-        var s = "You're not monitoring " + host + ". Can't remove it.";
+        s = "You're not monitoring " + host + ". Can't remove it.";
         nba.sendMessage(chat_id, s.toString('utf8'));
     }
-}
+};
 
 function loadServersList() {
     console.log('Loading servers list.');
-    servers_list = {};
+    exports.servers_list = {};
 
     try {
-        servers_list = jsonfile.readFileSync(SERVERSFILE_PATH);
+        exports.servers_list = jsonfile.readFileSync(SERVERSFILE_PATH);
         console.log(SERVERSFILE_NAME + " loaded correctly.");
     }
     catch (err) {
@@ -96,11 +93,12 @@ function loadServersList() {
 }
 
 function delayedCheck(user, host) {
+    var s;
     ping.promise.probe(host)
         .then (function (res) {
             if (!res.alive) {
                 if (servers_list[user].hosts[host].alive == true) {
-                    var s = "Host " + host + " is dead.";
+                    s = "Host " + host + " is dead.";
                     console.log(s + " Sending notification to " + servers_list[user].username + ": " + user);
                     nba.sendMessage(user, s.toString('utf8'));
                 }
@@ -108,7 +106,7 @@ function delayedCheck(user, host) {
             }
             else {
                 if (servers_list[user].hosts[host].alive == false) {
-                    var s = "Host " + host + " is back online.";
+                    s = "Host " + host + " is back online.";
                     nba.sendMessage(user, s.toString('utf8'));
                 }
                 servers_list[user].hosts[host].alive = true;
@@ -117,6 +115,7 @@ function delayedCheck(user, host) {
 }
 
 function checkServers() {
+    var s;
     var users = Object.keys(servers_list);
     users.forEach(function (user) {
         hosts = Object.keys(servers_list[user].hosts);
@@ -125,7 +124,7 @@ function checkServers() {
                 .then (function (res) {
                     if (res.alive) {
                         if (servers_list[user].hosts[host].alive == false) {
-                            var s = "Host " + host + " is back online.";
+                            s = "Host " + host + " is back online.";
                             nba.sendMessage(user, s.toString('utf8'));
                         }
                         servers_list[user].hosts[host].alive = true;

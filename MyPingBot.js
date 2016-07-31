@@ -11,7 +11,7 @@ var check_login = function(botData) {
         console.log('Successfully connected to bot ' + botData.username + ' with id ' + botData.id + '.');
         nba.startUpdatesLoop();
     }
-}
+};
 
 nba.getMe(check_login);
 
