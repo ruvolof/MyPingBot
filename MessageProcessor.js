@@ -6,8 +6,6 @@ monitor = require('./Monitor.js');
 var ping = require('./node_modules/ping');
 var config = require('./config');
 
-servers_list = monitor.servers_list;
-
 exports.processMessage = function (update_id, msg) {
     console.log('Processing message '+update_id+', message id '+msg.message_id+ ', from '+msg.from.username+' '+msg.from.id);
 

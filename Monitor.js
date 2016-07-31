@@ -7,7 +7,8 @@ var jsonfile = require('./node_modules/jsonfile');
 var MAX_MON = 10;
 var SERVERSFILE_NAME = 'servers.json';
 var SERVERSFILE_PATH = __dirname + '/' + SERVERSFILE_NAME;
-exports.servers_list = {};
+
+servers_list = {};
 
 function hasReachedMax(user_id) {
     var i = 0;
@@ -80,10 +81,10 @@ exports.removeFromServersList = function (host, username, chat_id) {
 
 function loadServersList() {
     console.log('Loading servers list.');
-    exports.servers_list = {};
+    servers_list = {};
 
     try {
-        exports.servers_list = jsonfile.readFileSync(SERVERSFILE_PATH);
+        servers_list = jsonfile.readFileSync(SERVERSFILE_PATH);
         console.log(SERVERSFILE_NAME + " loaded correctly.");
     }
     catch (err) {
