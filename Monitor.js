@@ -44,7 +44,7 @@ exports.addToServersList = function (host, username, chat_id) {
                 jsonfile.writeFile(SERVERSFILE_PATH, servers_list, {spaces: 4}, function (err) {
                     if (err) {
                         console.error(err.message);
-                        s = "Your host has been added, but an error occurred while storing the data in case of a reboot of the the bot.";
+                        s = "Your host has been added, but an error may have occurred while storing your preference.";
                         nba.sendMessage(chat_id, s.toString('utf8'));
                     }
                     else {
