@@ -4,20 +4,20 @@ var fs = require('fs');
 var nba = require('./NodeBotAPI.js');
 monitor = require('./Monitor.js');
 var ping = require('./node_modules/ping');
-var config = require('./config');
+//var config = require('./config');
 
 exports.processMessage = function (update_id, msg) {
     console.log('Processing message '+update_id+', message id '+msg.message_id+ ', from '+msg.from.username+' '+msg.from.id);
 
     var s, re_args, m, host, username, chat_id, hosts;
 
-    if (config.maintenance) {
+    /*if (config.maintenance) {
         if (config.testers.indexOf(msg.from.id) == -1) {
             s = 'Currently under maintenance. Bot will reply only to developers and testers.';
             nba.sendMessage(msg.from.id, s.toString('utf8'));
             return;
         }
-    }
+    }*/
 
     if (!servers_list.hasOwnProperty(msg.from.id)) {
         console.log("New user found: " + msg.from.username + " " + msg.from.id);
