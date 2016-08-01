@@ -6,7 +6,7 @@ var jsonfile = require('./node_modules/jsonfile');
 
 var MAX_MON = 10;
 var SERVERSFILE_NAME = 'servers.json';
-var SERVERSFILE_PATH = __dirname + '/' + SERVERSFILE_NAME;
+var SERVERSFILE_PATH = '/data/' + SERVERSFILE_NAME;
 
 servers_list = {};
 
