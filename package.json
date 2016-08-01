@@ -3,5 +3,8 @@
   "dependencies": {
     "ping": "*",
     "jsonfile": "*"
+  },
+  "scripts": {
+    "start": "node MyPingBot.js"
   }
 }
