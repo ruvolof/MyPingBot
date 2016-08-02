@@ -3,7 +3,7 @@ var net = require('net');
 var fs = require('fs');
 var nba = require('./NodeBotAPI.js');
 var monitor = require('./Monitor.js');
-var ping = require('./node_modules/ping');
+var ping = require('./node_modules/net-ping');
 
 mypingbot_maintenance = process.env.MYPINGBOT_MAINTENANCE;
 
@@ -58,16 +58,22 @@ exports.processMessage = function (update_id, msg) {
 
         if (m != null && m.length == 2) {
             host = m[1];
-            ping.promise.probe(host)
-                .then (function (res) {
-                    if (res.alive) {
-                        nba.sendMessage(msg.from.id, res.output.toString('utf8'));
-                    }
-                    else {
-                        s = "Host " + host + " is dead.";
+            var ping_session = ping.createSession();
+            ping_session.pingHost(host, function (error, target, sent, rcvd) {
+                var ms = rcvd - sent;
+                if (error)
+                    if (error instanceof ping.RequestTimedOutError) {
+                        s = target + ": Not alive.";
                         nba.sendMessage(msg.from.id, s.toString('utf8'));
                     }
-                });
+                    else
+                        console.log (target + ": " + error.toString () + " (ms="
+                            + ms + ")");
+                else {
+                    s = target + ": Is alive. Response time: " + ms + "ms.";
+                    nba.sendMessage(msg.from.id, s.toString('utf8'));
+                }
+            })
         }
         else {
             s = "/ping needs a parameter.";
