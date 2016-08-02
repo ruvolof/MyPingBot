@@ -6,7 +6,7 @@ var mp = require('./MessageProcessor.js');
 
 //var TOKEN = config.TOKEN;
 
-var TOKEN = process.env.bot_token;
+var TOKEN = process.env.MYPINGBOT_TOKEN;
 
 exports.getMe = function (f) {
     https.get(APIURL+TOKEN+'/getMe', function(res) {

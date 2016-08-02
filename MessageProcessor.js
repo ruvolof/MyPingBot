@@ -2,9 +2,10 @@ var dns = require('dns');
 var net = require('net');
 var fs = require('fs');
 var nba = require('./NodeBotAPI.js');
-monitor = require('./Monitor.js');
+var monitor = require('./Monitor.js');
 var ping = require('./node_modules/ping');
-//var config = require('./config');
+
+mypingbot_maintenance = process.env.MYPINGBOT_MAINTENANCE;
 
 exports.processMessage = function (update_id, msg) {
     console.log('Processing message '+update_id+', message id '+msg.message_id+ ', from '+msg.from.username+' '+msg.from.id);
