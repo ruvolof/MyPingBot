@@ -2,11 +2,9 @@ const APIURL = 'https://api.telegram.org/bot';
 
 var https = require('https');
 var mp = require('./MessageProcessor.js');
-//var config = require('./config');
+var config = require('./config');
 
-//var TOKEN = config.TOKEN;
-
-var TOKEN = process.env.MYPINGBOT_TOKEN;
+var TOKEN = config.TOKEN;
 
 exports.getMe = function (f) {
     https.get(APIURL+TOKEN+'/getMe', function(res) {
