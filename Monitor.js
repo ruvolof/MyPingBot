@@ -11,14 +11,8 @@ var SERVERSFILE_PATH = __dirname+ '/' + SERVERSFILE_NAME;
 servers_list = {};
 
 function hasReachedMax(user_id) {
-    var i = 0;
-    var keys = Object.keys(servers_list[user_id].hosts);
-    keys.forEach(function (key) {
-        if (servers_list[user_id].hosts.hasOwnProperty(key)) {
-            i++;
-        }
-    });
-    return i >= MAX_MON;
+    var count = Object.keys(servers_list[user_id].hosts).length;
+    return count >= MAX_MON;
 }
 
 exports.addToServersList = function (host, username, chat_id) {
@@ -64,7 +58,7 @@ exports.removeFromServersList = function (host, username, chat_id) {
         jsonfile.writeFile(SERVERSFILE_PATH, servers_list, {spaces: 4}, function (err) {
             if (err) {
                 console.log(err.message);
-                s = "Host correctly removed. But an error occurred while storing this preference. It might get minitored again upun reboot.";
+                s = "Host correctly removed. But an error occurred while storing this preference. It might get monitored again upon reboot.";
                 nba.sendMessage(chat_id, s.toString('utf8'));
             }
             else {

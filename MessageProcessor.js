@@ -50,6 +50,42 @@ exports.processMessage = function (update_id, msg) {
         });
     }
 
+    // ping monitored
+    else if (/^\/pingmonitored\s*/.test(msg.text)) {
+        hosts = Object.keys(servers_list[msg.from.id].hosts);
+        var host_total = hosts.length;
+        var host_count = 0;
+        var alive = [];
+        var dead = [];
+
+        hosts.forEach(function (host) {
+            ping.promise.probe(host)
+                .then (function (res) {
+                    host_count++;
+                    if (res.alive) {
+                        servers_list[msg.from.id].hosts[host].alive = true;
+                        alive.push(host);
+                    } else {
+                        servers_list[msg.from.id].hosts[host].alive = false;
+                        dead.push(host);
+                    }
+
+                    if (host_count == host_total) {
+                        if (alive.length == 0) {
+                            s = "Dead servers:\n" + dead.join("\n");
+                        }
+                        else if (dead.length == 0) {
+                            s = "Alive servers:\n" + alive.join("\n");
+                        }
+                        else {
+                            s = "Alive servers:\n" + alive.join("\n") + "\n\nDead servers:\n" + dead.join("\n");
+                        }
+                        nba.sendMessage(msg.from.id, s.toString('utf8'));
+                    }
+                });
+        })
+    }
+
     // ping HOST
     else if (/^\/ping\s*/.test(msg.text)) {
         re_args = /^\/ping\s+([\.:\/a-z0-9]+)$/g;

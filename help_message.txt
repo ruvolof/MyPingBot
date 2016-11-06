@@ -10,6 +10,7 @@ Commands:
 /monitor HOST   Ping HOST every 5 minutes and send an alert if it's down.
 /unmonitor HOST Remove HOST from your monitor list.
 /listmonitor    List all hosts in your monitor list.
+/pingmonitored  Ping all servers that you are currently monitoring.
 /checkport HOST PORT    Check if PORT is open on HOST.
 
 Restrictions:
