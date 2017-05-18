@@ -64,7 +64,7 @@ exports.processMessage = function (update_id, msg) {
                     host_count++;
                     if (res.alive) {
                         servers_list[msg.from.id].hosts[host].alive = true;
-                        alive.push(host);
+                        alive.push(host + " (" + res.time + " ms)");
                     } else {
                         servers_list[msg.from.id].hosts[host].alive = false;
                         dead.push(host);
