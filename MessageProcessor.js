@@ -265,4 +265,9 @@ exports.processMessage = function (update_id, msg) {
             nba.sendMessage(msg.from.id, s.toString('utf8'));
         }
     }
+
+    else {
+        s = "Type /help for a list of available commands.";
+        nba.sendMessage(msg.from.id, s.toString('utf8'));
+    }
 };
