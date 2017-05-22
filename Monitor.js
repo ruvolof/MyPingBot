@@ -51,6 +51,37 @@ exports.addToServersList = function (host, username, chat_id) {
     }
 };
 
+exports.addToFavoriteServersList = function (host, username, chat_id) {
+    var s;
+    // Checking if the user is already monitoring the host.
+    if (servers_list[chat_id].favorites.hasOwnProperty(host)) {
+        s = host + " is already in your favorites.";
+        nba.sendMessage(chat_id, s.toString('utf8'));
+    }
+    else {
+        dns.lookup(host, function(err) {
+            if (err) {
+                s = "Couldn't resolve hostname " + host + ". Skipping.";
+                nba.sendMessage(chat_id, s.toString('utf8'));
+            }
+            else {
+                servers_list[chat_id].favorites[host] = 1;
+                jsonfile.writeFile(SERVERSFILE_PATH, servers_list, {spaces: 4}, function (err) {
+                    if (err) {
+                        console.error(err.message);
+                        s = "Your host has been added, but an error may have occurred while storing your preference.";
+                        nba.sendMessage(chat_id, s.toString('utf8'));
+                    }
+                    else {
+                        s = "Host added correctly.";
+                        nba.sendMessage(chat_id, s.toString('utf8'));
+                    }
+                })
+            }
+        });
+    }
+};
+
 exports.removeFromServersList = function (host, username, chat_id) {
     var s;
     if (servers_list[chat_id].hosts.hasOwnProperty(host)) {
@@ -67,8 +98,22 @@ exports.removeFromServersList = function (host, username, chat_id) {
             }
         })
     }
+    else if (servers_list[chat_id].favorites.hasOwnProperty(host)) {
+        delete servers_list[chat_id].favorites[host];
+        jsonfile.writeFile(SERVERSFILE_PATH, servers_list, {spaces: 4}, function (err) {
+            if (err) {
+                console.log(err.message);
+                s = "Host correctly removed. But an error occurred while storing this preference. You might find it again in your favorites list.";
+                nba.sendMessage(chat_id, s.toString('utf8'));
+            }
+            else {
+                s = "Host correctly removed.";
+                nba.sendMessage(chat_id, s.toString('utf8'));
+            }
+        })
+    }
     else {
-        s = "You're not monitoring " + host + ". Can't remove it.";
+        s = "You're not either monitoring " + host + " or have it in your favorites list. Can't remove it.";
         nba.sendMessage(chat_id, s.toString('utf8'));
     }
 };

@@ -9,7 +9,7 @@ var ping = require('./node_modules/ping');
 exports.processMessage = function (update_id, msg) {
     console.log('Processing message '+update_id+', message id '+msg.message_id+ ', from '+msg.from.username+' '+msg.from.id);
 
-    var s, re_args, m, host, username, chat_id, hosts;
+    var s, re_args, m, host, username, chat_id, hosts, favorites;
 
     if (config.maintenance) {
         if (config.testers.indexOf(msg.from.id) == -1) {
@@ -24,6 +24,7 @@ exports.processMessage = function (update_id, msg) {
         servers_list[msg.from.id] = {
             username: msg.from.username,
             hosts: {},
+            favorites: {},
             last_access: Date.now()
         }
     }
@@ -51,8 +52,8 @@ exports.processMessage = function (update_id, msg) {
     }
 
     // ping monitored
-    else if (/^\/pingmonitored\s*/.test(msg.text)) {
-        hosts = Object.keys(servers_list[msg.from.id].hosts);
+    else if (/^\/pingservers\s*/.test(msg.text)) {
+        hosts = Object.keys(servers_list[msg.from.id].hosts).concat(Object.keys(servers_list[msg.from.id].favorites));
         var host_total = hosts.length;
         var host_count = 0;
         var alive = [];
@@ -63,10 +64,10 @@ exports.processMessage = function (update_id, msg) {
                 .then (function (res) {
                     host_count++;
                     if (res.alive) {
-                        servers_list[msg.from.id].hosts[host].alive = true;
+                        //servers_list[msg.from.id].hosts[host].alive = true;
                         alive.push(host + " (" + res.time + " ms)");
                     } else {
-                        servers_list[msg.from.id].hosts[host].alive = false;
+                        //servers_list[msg.from.id].hosts[host].alive = false;
                         dead.push(host);
                     }
 
@@ -110,6 +111,30 @@ exports.processMessage = function (update_id, msg) {
         }
     }
 
+    // addfavorite HOST
+    else if (/^\/addfavorite\s*/.test(msg.text)) {
+        re_args = /^\/addfavorite\s+([\.:\/a-z0-9]+)$/g;
+        m = re_args.exec(msg.text);
+
+        if (m != null && m.length == 2) {
+            host = m[1];
+            username = msg.from.username;
+            chat_id = msg.from.id;
+
+            if (m[1] == "localhost" || m[1] == "127.0.0.1") {
+                s = "Won'tadd localhost to favorites. Skipping.";
+                nba.sendMessage(msg.from.id, s.toString('utf8'));
+                return;
+            }
+
+            monitor.addToFavoriteServersList(host, username, chat_id);
+        }
+        else {
+            s = "/addfavorite needs an host.";
+            nba.sendMessage(msg.from.id, s.toString('utf8'));
+        }
+    }
+
     // monitor HOST
     else if (/^\/monitor\s*/.test(msg.text)) {
         re_args = /^\/monitor\s+([\.:\/a-z0-9]+)$/g;
@@ -135,8 +160,8 @@ exports.processMessage = function (update_id, msg) {
     }
 
     // unmonitor HOST
-    else if (/^\/unmonitor\s*/.test(msg.text)) {
-        re_args = /^\/unmonitor\s+([\.:\/a-z0-9]+)$/g;
+    else if (/^\/remove\s*/.test(msg.text)) {
+        re_args = /^\/remove\s+([\.:\/a-z0-9]+)$/g;
         m = re_args.exec(msg.text);
 
         if (m != null && m.length == 2) {
@@ -147,19 +172,26 @@ exports.processMessage = function (update_id, msg) {
             monitor.removeFromServersList(host, username, chat_id);
         }
         else {
-            s = "/unmonitor needs a parameter.";
+            s = "/remove needs a parameter.";
             nba.sendMessage(msg.from.id, s.toString('utf8'));
         }
     }
 
     // Retrieve list of monitored server
-    else if (/^\/listmonitor\s*$/.test(msg.text))   {
+    else if (/^\/listservers\s*$/.test(msg.text))   {
         hosts = Object.keys(servers_list[msg.from.id].hosts);
-        if (hosts.length == 0) {
-            s = "You're not monitoring any server."
+        favorites = Object.keys(servers_list[msg.from.id].favorites);
+        if (hosts.length == 0 && favorites.length == 0) {
+            s = "You didn't set up any host."
+        }
+        else if (hosts.length != 0 && favorites.length == 0) {
+            s = "Monitored servers:\n" + hosts.join("\n");
+        }
+        else if (hosts.length == 0 && favorites.length != 0) {
+            s = "Favorites:\n" + favorites.join("\n");
         }
         else {
-            s = hosts.join("\n");
+            s = "Monitored servers:\n" + hosts.join("\n") + "\n\nFavorites:\n" + favorites.join("\n");
         }
 
         nba.sendMessage(msg.from.id, s.toString('utf8'));
