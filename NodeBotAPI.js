@@ -7,10 +7,10 @@ var config = require('./config');
 var TOKEN = config.TOKEN;
 
 exports.getMe = function (f) {
+    var body = '';
+    var r;
+    var botData;
     https.get(APIURL+TOKEN+'/getMe', function(res) {
-        var body = '';
-        var r;
-
         res.on('data', function (data) {
             body += data;
         });
@@ -18,11 +18,11 @@ exports.getMe = function (f) {
         res.on('end', function() {
             r = JSON.parse(body);
 
-            if (r['ok'] == true) {
+            if (r.ok == true) {
                 console.log('Creating BotData');
-                var botData = {
-                    username: '@' + r['result']['username'],
-                    id: r['result']['id']
+                botData = {
+                    username: '@' + r.result.username,
+                    id: r.result.id
                 };
                 f(botData);
             } else {
@@ -36,9 +36,9 @@ exports.getMe = function (f) {
 var msg_id = 0;
 
 function emptyUpdates() {
+    var body = '';
+    var r;
     https.get(APIURL+TOKEN+'/getUpdates?offset=-1', function (res) {
-        var body = '';
-        var r;
         res.on('data', function (data) {
             body += data;
         });
@@ -56,8 +56,7 @@ function emptyUpdates() {
                     msg_id = r.result[0].update_id;
                     msg_id++;
                     https.get(APIURL+TOKEN+'/getUpdates?offset='+msg_id, function (res) {
-                        var body = '';
-                        var r;
+                        body = '';
                         res.on('data', function (data) {
                             body += data;
                         });
@@ -80,10 +79,10 @@ function emptyUpdates() {
 }
 
 function getUpdates(offset) {
+    var body = '';
+    var r;
+    var current_msg;
     https.get(APIURL+TOKEN+'/getUpdates?offset='+offset+'&timeout=10', function (res) {
-        var body = '';
-        var r;
-
         res.on('data', function (data) {
             body += data;
         });
@@ -101,7 +100,7 @@ function getUpdates(offset) {
                 msg_id = r.result[0].update_id;
                 msg_id++;
                 getUpdates(msg_id);
-                var current_msg = r.result[0].message;
+                current_msg = r.result[0].message;
                 mp.processMessage(r.result[0].update_id, current_msg);
             }
         })
