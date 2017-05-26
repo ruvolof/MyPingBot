@@ -1,0 +1,5 @@
+Commands:
+
+/help   Show this help message.
+/stats  Show bot statistics.
+/adminmode  Exits admin mode.

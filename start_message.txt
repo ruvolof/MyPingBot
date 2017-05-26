@@ -1,0 +1,5 @@
+Welcome to MyPingBot!
+
+Type /help for a list of available commands.
+
+By default, you will receive announcements such as new features, programmed maintenance, and other news related to the bot. In no case you will receive ads. Still, if you want to disable this option you can do so by typing /announcements.

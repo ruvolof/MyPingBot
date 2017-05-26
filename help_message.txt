@@ -13,6 +13,7 @@ Commands:
 /listservers    List all hosts in your monitor and favorites list.
 /pingservers  Ping all your favorite and monitored servers.
 /checkport HOST PORT    Check if PORT is open on HOST.
+/announcements  Change your announcements preference.
 
 Restrictions:
 

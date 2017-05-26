@@ -5,9 +5,44 @@ var nba = require('./NodeBotAPI.js');
 var monitor = require('./Monitor.js');
 var config = require('./config');
 var ping = require('./node_modules/ping');
+var admin = require('./Admin.js');
+
+var adminmode = false;
 
 exports.processMessage = function (update_id, msg) {
     console.log('Processing message '+update_id+', message id '+msg.message_id+ ', from '+msg.from.username+' '+msg.from.id);
+    var s;
+
+    // Checking for special commands from administrator
+    if (config.admin.indexOf(msg.from.id) != -1) {
+        if (/^\/maintenance\s*$/.test(msg.text)) {
+            config.maintenance = !config.maintenance;
+            if (config.maintenance) {
+                s = "Maintenance mode: ON";
+            }
+            else {
+                s = "Maintenance mode: OFF";
+            }
+            nba.sendMessage(msg.from.id, s.toString('utf8'));
+            return;
+        }
+        else if (/^\/adminmode\s*$/.test(msg.text)) {
+            adminmode = !adminmode;
+            if (adminmode) {
+                s = "Admin mode: ON";
+            }
+            else {
+                s = "Admin mode: OFF";
+            }
+            nba.sendMessage(msg.from.id, s.toString('utf8'));
+            return;
+        }
+    }
+
+    if (adminmode && config.admin.indexOf(msg.from.id) != -1) {
+        admin.processAdminMessage(msg);
+        return;
+    }
 
     if (config.maintenance) {
         if (config.admin.indexOf(msg.from.id) == -1 && config.testers.indexOf(msg.from.id) == -1 && config.developers.indexOf(msg.from.id) == -1) {
@@ -23,7 +58,8 @@ exports.processMessage = function (update_id, msg) {
             username: msg.from.username,
             hosts: {},
             favorites: {},
-            last_access: Date.now()
+            last_access: Date.now(),
+            announcements: true
         }
     }
     else {
@@ -42,8 +78,13 @@ exports.processMessage = function (update_id, msg) {
         help(msg.from.id);
     }
 
+    // start
+    else if (/^\/start\s*$/.test(msg.text)) {
+        start(msg.from.id);
+    }
+
     // ping monitored
-    else if (/^\/pingservers\s*/.test(msg.text)) {
+    else if (/^\/pingservers\s*$/.test(msg.text)) {
         pingServers(msg.from.id);
     }
 
@@ -82,6 +123,11 @@ exports.processMessage = function (update_id, msg) {
         checkPort(msg.from.id, msg.text);
     }
 
+    // change announcements preference
+    else if (/^\/announcements\s*$/.test(msg.text)) {
+        setAnnouncements(msg.from.id);
+    }
+
     else {
         s = "Type /help for a list of available commands.";
         nba.sendMessage(msg.from.id, s.toString('utf8'));
@@ -90,6 +136,17 @@ exports.processMessage = function (update_id, msg) {
 
 function help(id) {
     fs.readFile(__dirname + '/help_message.txt', function (err, data) {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            nba.sendMessage(id, data.toString('utf8'));
+        }
+    });
+}
+
+function start(id) {
+    fs.readFile(__dirname + '/start_message.txt', function (err, data) {
         if (err) {
             console.log(err);
         }
@@ -343,4 +400,16 @@ function checkPort(id, text) {
         s = "/checkport needs two parameters: hostaname and port.";
         nba.sendMessage(msg.from.id, s.toString('utf8'));
     }
+}
+
+function setAnnouncements(id) {
+    var s;
+    servers_list[id].announcements = !servers_list[id].announcements;
+    if (servers_list[id].announcements) {
+        s = "Announcements: ON";
+    }
+    else {
+        s = "Announcements: OFF";
+    }
+    nba.sendMessage(id, s.toString('utf8'));
 }
