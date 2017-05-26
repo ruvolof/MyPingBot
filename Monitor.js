@@ -15,7 +15,7 @@ function hasReachedMax(user_id) {
     return count >= MAX_MON;
 }
 
-exports.addToServersList = function (host, username, chat_id) {
+exports.addToServersList = function (host, chat_id) {
     var s;
     // Checking if the user is already monitoring the host.
     if (servers_list[chat_id].hosts.hasOwnProperty(host)) {
@@ -51,11 +51,15 @@ exports.addToServersList = function (host, username, chat_id) {
     }
 };
 
-exports.addToFavoriteServersList = function (host, username, chat_id) {
+exports.addToFavoriteServersList = function (host, chat_id) {
     var s;
     // Checking if the user is already monitoring the host.
     if (servers_list[chat_id].favorites.hasOwnProperty(host)) {
         s = host + " is already in your favorites.";
+        nba.sendMessage(chat_id, s.toString('utf8'));
+    }
+    else if (servers_list[chat_id].hosts.hasOwnProperty(host)) {
+        s = "You are currently monitoring " + host + ". No reason to add to favorites.";
         nba.sendMessage(chat_id, s.toString('utf8'));
     }
     else {
@@ -82,7 +86,7 @@ exports.addToFavoriteServersList = function (host, username, chat_id) {
     }
 };
 
-exports.removeFromServersList = function (host, username, chat_id) {
+exports.removeFromServersList = function (host, chat_id) {
     var s;
     if (servers_list[chat_id].hosts.hasOwnProperty(host)) {
         delete servers_list[chat_id].hosts[host];
