@@ -8,6 +8,8 @@ var ping = require('./node_modules/ping');
 var admin = require('./Admin.js');
 
 var adminmode = false;
+var EDIT_TIMEOUT = 2000;
+var NEWM_TIMEOUT = 5000;
 
 exports.processMessage = function (update_id, msg) {
     console.log('Processing message '+update_id+', message id '+msg.message_id+ ', from '+msg.from.username+' '+msg.from.id);
@@ -63,13 +65,25 @@ exports.processMessage = function (update_id, msg) {
         }
     }
     else {
-        if ((Date.now() - servers_list[msg.from.id].last_access) < 5000) {
-            s = "You're allowed to send a message every 5 seconds. Too fast, retry.";
-            nba.sendMessage(msg.from.id, s.toString('utf8'));
-            return;
+        if (msg.isEdit) {
+            if ((Date.now() - servers_list[msg.from.id].last_access) < EDIT_TIMEOUT) {
+                s = "You're allowed to edit a message once every " + (EDIT_TIMEOUT / 1000) + " seconds. Too fast, retry.";
+                nba.sendMessage(msg.from.id, s.toString('utf8'));
+                return;
+            }
+            else {
+                servers_list[msg.from.id].last_access = Date.now();
+            }
         }
         else {
-            servers_list[msg.from.id].last_access = Date.now();
+            if ((Date.now() - servers_list[msg.from.id].last_access) < NEWM_TIMEOUT) {
+                s = "You're allowed to send a message once every " + (NEWM_TIMEOUT / 1000) + " seconds. Too fast, retry.";
+                nba.sendMessage(msg.from.id, s.toString('utf8'));
+                return;
+            }
+            else {
+                servers_list[msg.from.id].last_access = Date.now();
+            }
         }
     }
 

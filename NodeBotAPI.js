@@ -119,9 +119,11 @@ function getUpdates(offset) {
                 getUpdates(msg_id);
                 if (r.result[0].hasOwnProperty('edited_message')) {
                     current_msg = r.result[0].edited_message;
+                    current_msg.isEdit = true;
                 }
                 else {
                     current_msg = r.result[0].message;
+                    current_msg.isEdit = false;
                 }
 
                 if (current_msg != undefined) {

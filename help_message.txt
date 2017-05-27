@@ -17,5 +17,5 @@ Commands:
 
 Restrictions:
 
-- You're allowed to send one message every 5 seconds.
+- You're allowed to send one message every 5 seconds, or edit a previous message every 2 seconds.
 - You're allowed to monitor up to 10 hosts.
