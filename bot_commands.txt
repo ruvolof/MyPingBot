@@ -6,3 +6,4 @@ remove - remove HOST from list
 listservers - retrieve list of monitored or favorite hosts
 pingservers - ping all monitored servers
 checkport - check if HOST has open PORT
+announcements - change announcements preference
