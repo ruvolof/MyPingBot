@@ -84,7 +84,7 @@ function emptyUpdates() {
 function getUpdates(offset) {
     var body = '';
     var r;
-    var current_msg;
+    var current_msg = undefined;
     var s;
     https.get(APIURL+TOKEN+'/getUpdates?offset='+offset+'&timeout=10', function (res) {
         res.on('data', function (data) {
@@ -117,8 +117,19 @@ function getUpdates(offset) {
                 msg_id = r.result[0].update_id;
                 msg_id++;
                 getUpdates(msg_id);
-                current_msg = r.result[0].message;
-                mp.processMessage(r.result[0].update_id, current_msg);
+                if (r.result[0].hasOwnProperty('edited_message')) {
+                    current_msg = r.result[0].edited_message;
+                }
+                else {
+                    current_msg = r.result[0].message;
+                }
+
+                if (current_msg != undefined) {
+                    mp.processMessage(r.result[0].update_id, current_msg);
+                }
+                else {
+                    console.log("Not processing message " + msg_id + ".");
+                }
             }
         })
     })
