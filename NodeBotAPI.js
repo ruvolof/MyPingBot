@@ -6,6 +6,9 @@ var config = require('./config');
 
 var TOKEN = config.TOKEN;
 
+var ERROR_COUNT = 0;
+var MAX_ERRORS = 5;
+
 exports.getMe = function (f) {
     var body = '';
     var r;
@@ -82,6 +85,7 @@ function getUpdates(offset) {
     var body = '';
     var r;
     var current_msg;
+    var s;
     https.get(APIURL+TOKEN+'/getUpdates?offset='+offset+'&timeout=10', function (res) {
         res.on('data', function (data) {
             body += data;
@@ -92,11 +96,24 @@ function getUpdates(offset) {
 
             if (r.ok == false) {
                 console.log('getUpdates: '+r.error_code+': '+r.description);
+                ERROR_COUNT++;
+                if (ERROR_COUNT <= MAX_ERRORS) {
+                    getUpdates(offset);
+                }
+                else {
+                   s = 'Too many errors. Stopping getUpdates.';
+                   console.log(s);
+                   config.admin.forEach(function (adm_id) {
+                       sendMessage(adm_id, s.toString('utf8'));
+                   });
+                }
             }
             else if (r.result.length == 0){
+                ERROR_COUNT = 0;
                 getUpdates(offset);
             }
             else {
+                ERROR_COUNT = 0;
                 msg_id = r.result[0].update_id;
                 msg_id++;
                 getUpdates(msg_id);
