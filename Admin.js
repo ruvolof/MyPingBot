@@ -1,6 +1,8 @@
 var fs = require('fs');
 var nba = require('./NodeBotAPI.js');
 
+var bmsg;
+
 exports.processAdminMessage = function(msg) {
     var s;
 
@@ -9,6 +11,12 @@ exports.processAdminMessage = function(msg) {
     }
     else if (/^\/stats\s*$/.test(msg.text)) {
         getStats(msg.from.id);
+    }
+    else if (/^\/broadcast\s*/.test(msg.text)) {
+        setBroadcastMessage(msg.from.id, msg.text);
+    }
+    else if (/^\/confirmBroadcast\s*$/.test(msg.text)) {
+        sendBroadcast(msg.from.id);
     }
     else {
         s = "Unavailable command. Type /help or exit admin mode.";
@@ -44,5 +52,42 @@ function getStats(id) {
     s += "Monitor count: " + hosts + "\n";
     s += "Bookmark count: " + bookmarks + "\n";
 
+    nba.sendMessage(id, s.toString('utf8'));
+}
+
+function setBroadcastMessage(id, cmd) {
+    var s;
+    var text = cmd.indexOf(' ') != -1 ? cmd.substr(cmd.indexOf(' ') + 1) : "";
+
+    if (text != "") {
+        bmsg = text;
+        s = "This message will be sent to all users:\n\n";
+        s += "\"" + bmsg + "\"";
+        s += "\n\nClick /confirmBroadcast to confirm.";
+    }
+    else {
+        s = "No message found. Usage: /broadcast whatever you want.";
+    }
+
+    nba.sendMessage(id, s.toString('utf8'));
+}
+
+function sendBroadcast(id) {
+    var users = Object.keys(servers_list);
+    var count = 0;
+    var s;
+    if (bmsg != "") {
+        users.forEach(function (user) {
+            if (servers_list[user].announcements) {
+                count++;
+                nba.sendMessage(user, bmsg.toString('utf8'));
+            }
+        });
+        s = "The message has been sent to " + count + " users.";
+        bmsg = "";
+    }
+    else {
+        s = "No message has been set. Use /broadcast to set it.";
+    }
     nba.sendMessage(id, s.toString('utf8'));
 }
