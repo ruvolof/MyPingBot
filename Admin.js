@@ -1,5 +1,6 @@
 var fs = require('fs');
 var nba = require('./NodeBotAPI.js');
+var monitor = require('./Monitor.js');
 
 var bmsg;
 
@@ -17,6 +18,12 @@ exports.processAdminMessage = function(msg) {
     }
     else if (/^\/confirmBroadcast\s*$/.test(msg.text)) {
         sendBroadcast(msg.from.id);
+    }
+    else if(/^\/dumpStatus\s*$/.test(msg.text)) {
+        dumpStatus();
+    }
+    else if (/^\/manualCheck\s*/.test(msg.text)) {
+        manualCheck();
     }
     else {
         s = "Unavailable command. Type /help or exit admin mode.";
@@ -90,4 +97,19 @@ function sendBroadcast(id) {
         s = "No message has been set. Use /broadcast to set it.";
     }
     nba.sendMessage(id, s.toString('utf8'));
+}
+
+function dumpStatus() {
+    console.log(servers_list);
+    var users = Object.keys(servers_list);
+    users.forEach(function (user) {
+        var hosts = Object.keys(servers_list[user].hosts);
+        hosts.forEach(function (host) {
+            console.log(servers_list[user].hosts[host]);
+        })
+    })
+}
+
+function manualCheck() {
+    monitor.manualCheck();
 }

@@ -185,10 +185,11 @@ function checkServers() {
                         }
                         servers_list[user].hosts[host].consecutive_fails = 0;
                         servers_list[user].hosts[host].alive = true;
-                    } else {
+                    }
+                    else {
                         servers_list[user].hosts[host].failed_pings++;
                         servers_list[user].hosts[host].consecutive_fails++;
-                        if (servers_list[user].hosts[host].consecutive_fails >= 2) {
+                        if (servers_list[user].hosts[host].consecutive_fails >= FAIL_BEFORE_NOTIFICATION) {
                             if (servers_list[user].hosts[host].alive == true) {
                                 s = "Host " + host + " is dead.";
                                 console.log(s + " Sending notification to " + servers_list[user].username + ": " + user);
@@ -215,6 +216,10 @@ function saveStatus() {
             console.error(err.message);
         }
     })
+}
+
+exports.manualCheck = function () {
+    checkServers();
 }
 
 exports.startMonitor = function (autosave) {

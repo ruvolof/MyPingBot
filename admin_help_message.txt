@@ -3,4 +3,5 @@ Commands:
 /help   Show this help message.
 /stats  Show bot statistics.
 /broadcast  Send a message to all users.
+/manualCheck Run the monitor check routine manually.
 /adminmode  Exits admin mode.
