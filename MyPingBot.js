@@ -16,4 +16,4 @@ var check_login = function(botData) {
 nba.getMe(check_login);
 
 // Loading server list and start monitor
-monitor.startMonitor();
+monitor.startMonitor(true);

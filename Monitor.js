@@ -4,9 +4,13 @@ var nba = require('./NodeBotAPI.js');
 var ping = require('./node_modules/ping');
 var jsonfile = require('./node_modules/jsonfile');
 
-var MAX_MON = 10;
 var SERVERSFILE_NAME = 'servers.json';
 var SERVERSFILE_PATH = __dirname+ '/' + SERVERSFILE_NAME;
+
+var MAX_MON = 10;
+var CHECK_INTERVAL = 300000;
+var SAVE_INTERVAL = CHECK_INTERVAL * 4;
+var FAIL_BEFORE_NOTIFICATION = 2;
 
 servers_list = {};
 
@@ -34,7 +38,12 @@ exports.addToServersList = function (host, chat_id) {
                 nba.sendMessage(chat_id, s.toString('utf8'));
             }
             else {
-                servers_list[chat_id].hosts[host] = {alive: true};
+                servers_list[chat_id].hosts[host] = {
+                    alive: true,
+                    consecutive_fails: 0,
+                    total_pings: 0,
+                    failed_pings: 0
+                };
                 jsonfile.writeFile(SERVERSFILE_PATH, servers_list, {spaces: 4}, function (err) {
                     if (err) {
                         console.error(err.message);
@@ -136,6 +145,7 @@ function loadServersList() {
 
 }
 
+/*
 function delayedCheck(user, host) {
     var s;
     ping.promise.probe(host)
@@ -157,6 +167,7 @@ function delayedCheck(user, host) {
             }
         });
 }
+*/
 
 function checkServers() {
     var s;
@@ -166,25 +177,52 @@ function checkServers() {
         hosts.forEach(function(host) {
             ping.promise.probe(host)
                 .then (function (res) {
+                    servers_list[user].hosts[host].total_pings++;
                     if (res.alive) {
                         if (servers_list[user].hosts[host].alive == false) {
                             s = "Host " + host + " is back online.";
                             nba.sendMessage(user, s.toString('utf8'));
                         }
+                        servers_list[user].hosts[host].consecutive_fails = 0;
                         servers_list[user].hosts[host].alive = true;
                     } else {
+                        servers_list[user].hosts[host].failed_pings++;
+                        servers_list[user].hosts[host].consecutive_fails++;
+                        if (servers_list[user].hosts[host].consecutive_fails >= 2) {
+                            if (servers_list[user].hosts[host].alive == true) {
+                                s = "Host " + host + " is dead.";
+                                console.log(s + " Sending notification to " + servers_list[user].username + ": " + user);
+                                nba.sendMessage(user, s.toString('utf8'));
+                            }
+                            servers_list[user].hosts[host].alive = false;
+                        }
+
+                        /*
                         // Delaying checks to avoid false positive
                         setTimeout(function () {
                             delayedCheck(user, host);
                         }, 15000);
+                        */
                     }
                 });
         });
     });
 }
 
-exports.startMonitor = function () {
+function saveStatus() {
+    jsonfile.writeFile(SERVERSFILE_PATH, servers_list, {spaces: 4}, function (err) {
+        if (err) {
+            console.error(err.message);
+        }
+    })
+}
+
+exports.startMonitor = function (autosave) {
     loadServersList();
     checkServers();
-    setInterval(checkServers, 300000);
+    setInterval(checkServers, CHECK_INTERVAL);
+
+    if (autosave) {
+        setInterval(saveStatus, SAVE_INTERVAL);
+    }
 };
