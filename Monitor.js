@@ -219,6 +219,7 @@ function saveStatus() {
 
 exports.startMonitor = function (autosave) {
     loadServersList();
+    nba.startUpdatesLoop();
     checkServers();
     setInterval(checkServers, CHECK_INTERVAL);
 
