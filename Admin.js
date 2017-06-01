@@ -100,14 +100,7 @@ function sendBroadcast(id) {
 }
 
 function dumpStatus() {
-    console.log(servers_list);
-    var users = Object.keys(servers_list);
-    users.forEach(function (user) {
-        var hosts = Object.keys(servers_list[user].hosts);
-        hosts.forEach(function (host) {
-            console.log(servers_list[user].hosts[host]);
-        })
-    })
+    console.dir(servers_list, {depth: null});
 }
 
 function manualCheck() {
