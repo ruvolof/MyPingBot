@@ -97,37 +97,39 @@ exports.addToFavoriteServersList = function (host, chat_id) {
 
 exports.removeFromServersList = function (host, chat_id) {
     var s;
+    var modified = false;
+    if (host == "ALL" || host == "all") {
+        servers_list[chat_id].hosts.clear();
+        servers_list[chat_id].favorites.clear();
+        s = "All hosts correctly removed.";
+        modified = true;
+    }
     if (servers_list[chat_id].hosts.hasOwnProperty(host)) {
         delete servers_list[chat_id].hosts[host];
-        jsonfile.writeFile(SERVERSFILE_PATH, servers_list, {spaces: 4}, function (err) {
-            if (err) {
-                console.log(err.message);
-                s = "Host correctly removed. But an error occurred while storing this preference. It might get monitored again upon reboot.";
-                nba.sendMessage(chat_id, s.toString('utf8'));
-            }
-            else {
-                s = "Host correctly removed.";
-                nba.sendMessage(chat_id, s.toString('utf8'));
-            }
-        })
+        s = "Host correctly removed.";
+        modified = true;
     }
     else if (servers_list[chat_id].favorites.hasOwnProperty(host)) {
         delete servers_list[chat_id].favorites[host];
-        jsonfile.writeFile(SERVERSFILE_PATH, servers_list, {spaces: 4}, function (err) {
-            if (err) {
-                console.log(err.message);
-                s = "Host correctly removed. But an error occurred while storing this preference. You might find it again in your favorites list.";
-                nba.sendMessage(chat_id, s.toString('utf8'));
-            }
-            else {
-                s = "Host correctly removed.";
-                nba.sendMessage(chat_id, s.toString('utf8'));
-            }
-        })
+        s = "Host correctly removed.";
+        modified = true;
     }
     else {
         s = "You're not either monitoring " + host + " or have it in your favorites list. Can't remove it.";
         nba.sendMessage(chat_id, s.toString('utf8'));
+    }
+
+    if (modified) {
+        jsonfile.writeFile(SERVERSFILE_PATH, servers_list, {spaces: 4}, function (err) {
+            if (err) {
+                console.log(err.message);
+                s += " But an error occurred while saving the operation. It might get back on your list upon reboot.";
+                nba.sendMessage(chat_id, s.toString('utf8'));
+            }
+            else {
+                nba.sendMessage(chat_id, s.toString('utf8'));
+            }
+        })
     }
 };
 
