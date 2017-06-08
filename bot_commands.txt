@@ -1,3 +1,4 @@
+help - show help
 ping - ping HOST
 host - show HOST address or reverse resolve an IP
 monitor - check if HOST is alive every 5 minutes
@@ -7,3 +8,5 @@ listservers - retrieve list of monitored or favorite hosts
 pingservers - ping all monitored servers
 checkport - check if HOST has open PORT
 announcements - change announcements preference
+resetstats - reset all monitor stats
+stats - show availability stats for your servers

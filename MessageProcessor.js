@@ -141,6 +141,16 @@ exports.processMessage = function (update_id, msg) {
     else if (/^\/announcements\s*$/.test(msg.text)) {
         setAnnouncements(msg.from.id);
     }
+    
+    // reset stats
+    else if (/^\/resetstats\s*$/.test(msg.text)) {
+        resetStats(msg.from.id);
+    }
+
+    // print stats
+    else if (/^\/stats\s*$/.test(msg.text)) {
+        sendStats(msg.from.id);
+    }
 
     else {
         s = "Type /help for a list of available commands.";
@@ -425,5 +435,39 @@ function setAnnouncements(id) {
     else {
         s = "Announcements: OFF";
     }
+    nba.sendMessage(id, s.toString('utf8'));
+}
+
+function resetStats(id) {
+    var s;
+    var hosts = Object.keys(servers_list[id].hosts);
+    hosts.forEach(function (host) {
+        var h = servers_list[id].hosts[host];
+        h.last_stats_reset = Date.now();
+        h.total_pings = 0;
+        h.failed_pings = 0;
+    });
+
+    s = "All stats have been reset.";
+    nba.sendMessage(id, s.toString('utf8'));
+}
+
+function sendStats(id) {
+    var s = '';
+    var hosts = Object.keys(servers_list[id].hosts);
+    hosts.forEach(function (host) {
+        var h = servers_list[id].hosts[host];
+        if (h.total_pings > 0) {
+            var d = new Date(h.last_stats_reset);
+            s += host + ' (since ' + d.getMonth() + '/' + d.getDate() + '/' + d.getFullYear() + ')\n';
+            s += '\tPing sent: ' + h.total_pings + '\n';
+            s += '\tPing received: ' + (h.total_pings - h.failed_pings) + '\n';
+            s += '\tAvailability: ' + (((h.total_pings - h.failed_pings) / h.total_pings) * 100).toFixed(2) + ' %\n\n';
+        }
+        else {
+            s += host + ': No data available.\n\n';
+        }
+    })
+
     nba.sendMessage(id, s.toString('utf8'));
 }

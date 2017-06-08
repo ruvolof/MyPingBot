@@ -42,7 +42,8 @@ exports.addToServersList = function (host, chat_id) {
                     alive: true,
                     consecutive_fails: 0,
                     total_pings: 0,
-                    failed_pings: 0
+                    failed_pings: 0,
+                    last_stats_reset: Date.now()
                 };
                 jsonfile.writeFile(SERVERSFILE_PATH, servers_list, {spaces: 4}, function (err) {
                     if (err) {
