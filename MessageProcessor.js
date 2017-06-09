@@ -422,7 +422,7 @@ function checkPort(id, text) {
     }
     else {
         s = "/checkport needs two parameters: hostaname and port.";
-        nba.sendMessage(msg.from.id, s.toString('utf8'));
+        nba.sendMessage(id, s.toString('utf8'));
     }
 }
 
