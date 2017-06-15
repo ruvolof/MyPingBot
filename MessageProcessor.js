@@ -459,7 +459,7 @@ function sendStats(id) {
         var h = servers_list[id].hosts[host];
         if (h.total_pings > 0) {
             var d = new Date(h.last_stats_reset);
-            s += host + ' (since ' + d.getMonth() + '/' + d.getDate() + '/' + d.getFullYear() + ')\n';
+            s += host + ' (since ' + (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear() + ')\n';
             s += '\tPing sent: ' + h.total_pings + '\n';
             s += '\tPing received: ' + (h.total_pings - h.failed_pings) + '\n';
             s += '\tAvailability: ' + (((h.total_pings - h.failed_pings) / h.total_pings) * 100).toFixed(2) + ' %\n\n';
