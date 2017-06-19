@@ -10,11 +10,11 @@ Commands:
 /checkport HOST PORT    Check if PORT is open on HOST.
 /monitor HOST   Ping HOST every 5 minutes and send an alert if it's down.
 /addfavorite HOST   Add a bookmark for quick ping.
-/remove HOST Remove HOST from your servers.
+/remove HOST/ALL Remove HOST from your servers.
 /listservers    List all hosts in your monitor and favorites list.
 /pingservers  Ping all your favorite and monitored servers.
 /stats  Show stats for your monitored servers.
-/resetstats Reset all stats for your monitored servers.
+/resetstats HOST/ALL Reset all stats for your monitored servers.
 /announcements  Change your announcements preference.
 
 Restrictions:
