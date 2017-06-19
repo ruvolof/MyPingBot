@@ -102,9 +102,9 @@ function getUpdates(offset) {
                 }
                 else {
                    s = 'Too many errors. Stopping getUpdates.';
-                   console.log(s);
+                   console.error(s);
                    config.admin.forEach(function (adm_id) {
-                       sendMessage(adm_id, s.toString('utf8'));
+                       exports.sendMessage(adm_id, s.toString('utf8'));
                    });
                 }
             }

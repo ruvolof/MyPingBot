@@ -143,8 +143,8 @@ exports.processMessage = function (update_id, msg) {
     }
     
     // reset stats
-    else if (/^\/resetstats\s*$/.test(msg.text)) {
-        resetStats(msg.from.id);
+    else if (/^\/resetstats\s*/.test(msg.text)) {
+        resetStats(msg.from.id, msg.text);
     }
 
     // print stats
@@ -242,7 +242,7 @@ function pingHost(id, text) {
 }
 
 function addFavorite(id, text) {
-    var re_args = /^\/addfavorite\s+([\.:\/a-z0-9]+)$/g;
+    var re_args = /^\/addfavorite\s+([\.:\/a-z0-9]+)$/ig;
     var m = re_args.exec(text);
     var host;
     var s;
@@ -256,7 +256,7 @@ function addFavorite(id, text) {
             return;
         }
 
-        monitor.addToFavoriteServersList(host, id);
+        monitor.addToFavoriteServersList(host.toLowerCase(), id);
     }
     else {
         s = "/addfavorite needs an host.";
@@ -265,7 +265,7 @@ function addFavorite(id, text) {
 }
 
 function monitorHost(id, text) {
-    var re_args = /^\/monitor\s+([\.:\/a-z0-9]+)$/g;
+    var re_args = /^\/monitor\s+([\.:\/a-z0-9]+)$/ig;
     var m = re_args.exec(text);
     var host;
     var s;
@@ -279,7 +279,7 @@ function monitorHost(id, text) {
             return;
         }
 
-        monitor.addToServersList(host, id);
+        monitor.addToServersList(host.toLowerCase(), id);
     }
     else {
         s = "/monitor needs a parameter.";
@@ -288,14 +288,14 @@ function monitorHost(id, text) {
 }
 
 function remove(id, text) {
-    var re_args = /^\/remove\s+([\.:\/a-z0-9]+)$/g;
+    var re_args = /^\/remove\s+([\.:\/a-z0-9]+)$/ig;
     var m = re_args.exec(text);
     var host;
     var s;
 
     if (m != null && m.length == 2) {
         host = m[1];
-        monitor.removeFromServersList(host, id);
+        monitor.removeFromServersList(host.toLowerCase(), id);
     }
     else {
         s = "/remove needs a parameter.";
@@ -438,17 +438,44 @@ function setAnnouncements(id) {
     nba.sendMessage(id, s.toString('utf8'));
 }
 
-function resetStats(id) {
+function resetStats(id, text) {
+    var re_args = /^\/resetstats\s+([\.:\/a-z0-9]+)$/ig;
+    var m = re_args.exec(text);
     var s;
-    var hosts = Object.keys(servers_list[id].hosts);
-    hosts.forEach(function (host) {
-        var h = servers_list[id].hosts[host];
-        h.last_stats_reset = Date.now();
-        h.total_pings = 0;
-        h.failed_pings = 0;
-    });
+    var hosts;
+    var arg;
 
-    s = "All stats have been reset.";
+    if (m != null && m.length == 2) {
+        arg = m[1].toLowerCase();
+        if (arg == "all") {
+            hosts = Object.keys(servers_list[id].hosts);
+            hosts.forEach(function (host) {
+                var h = servers_list[id].hosts[host];
+                h.last_stats_reset = Date.now();
+                h.total_pings = 0;
+                h.failed_pings = 0;
+            });
+            s = "All stats have been reset.";
+        }
+        else {
+            if (servers_list[id].hosts.hasOwnProperty(arg)) {
+                hosts = servers_list[id].hosts[arg];
+                hosts.last_stats_reset = Date.now();
+                hosts.total_pings = 0;
+                hosts.failed_pings = 0;
+                s = "Stats for " + arg + " have been reset."
+            }
+            else {
+                s = "Host " + arg + " not found.";
+            }
+        }
+    }
+    else {
+        s = "/resetstats needs a parameter. Type \"all\" for all hosts.";
+    }
+
+
+
     nba.sendMessage(id, s.toString('utf8'));
 }
 
