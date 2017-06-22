@@ -134,6 +134,8 @@ function getUpdates(offset) {
                 }
             }
         })
+    }).on('error', function (e) {
+        getUpdates(offset);
     })
 }
 
