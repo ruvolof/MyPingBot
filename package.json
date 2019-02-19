@@ -1,8 +1,8 @@
 {
   "name": "MyPingBot",
   "dependencies": {
-    "ping": "*",
-    "jsonfile": "*"
+    "jsonfile": "^5.0.0",
+    "ping": "*"
   },
   "scripts": {
     "start": "node MyPingBot.js"

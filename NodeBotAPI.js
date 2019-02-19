@@ -54,6 +54,7 @@ function emptyUpdates() {
             else {
                 if (r.result.length == 0) {
                     console.log("Backlog empty.");
+                    getUpdates(msg_id);
                 }
                 else {
                     msg_id = r.result[0].update_id;
@@ -72,11 +73,11 @@ function emptyUpdates() {
                             else {
                                 console.log("Message backlog is now empty.");
                             }
+                            getUpdates(msg_id);
                         });
                     })
                 }
             }
-            getUpdates(msg_id);
         })
     })
 }
