@@ -5,7 +5,7 @@ var ping = require('./node_modules/ping');
 var jsonfile = require('./node_modules/jsonfile');
 
 var SERVERSFILE_NAME = 'servers.json';
-var SERVERSFILE_PATH = __dirname+ '/' + SERVERSFILE_NAME;
+var SERVERSFILE_PATH = __dirname + '/' + SERVERSFILE_NAME;
 
 var MAX_MON = 10;
 var CHECK_INTERVAL = 300000;
@@ -223,11 +223,10 @@ function saveStatus() {
 
 exports.manualCheck = function () {
     checkServers();
-}
+};
 
 exports.startMonitor = function (autosave) {
     loadServersList();
-    nba.startUpdatesLoop();
     checkServers();
     setInterval(checkServers, CHECK_INTERVAL);
 

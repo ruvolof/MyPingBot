@@ -149,9 +149,20 @@ exports.sendMessage = function (chat, text, keyboard, web_preview) {
         web_preview = true;
     }
 
+    var consumeRes = function (res) {
+        res.on('data', (chunk) => {});
+        res.on('end', () => {});
+    };
+
     if (keyboard == undefined) {
-        https.get(APIURL+TOKEN+'/sendMessage?chat_id='+chat+'&text='+encodeURIComponent(text)+'&disable_web_page_preview='+web_preview);
+        https.get(APIURL+TOKEN+'/sendMessage?chat_id='+chat+'&text='+encodeURIComponent(text)+'&disable_web_page_preview='+web_preview, consumeRes)
+            .on('error', (err) => {
+                console.error(e);
+            });
     } else {
-        https.get(APIURL+TOKEN+'/sendMessage?chat_id='+chat+'&text='+encodeURIComponent(text)+'&reply_markup='+encodeURIComponent(keyboard)+'&disable_web_page_preview='+web_preview);
+        https.get(APIURL+TOKEN+'/sendMessage?chat_id='+chat+'&text='+encodeURIComponent(text)+'&reply_markup='+encodeURIComponent(keyboard)+'&disable_web_page_preview='+web_preview, consumeRes)
+            .on('error', (err) => {
+                console.error(e);
+            });
     }
 };

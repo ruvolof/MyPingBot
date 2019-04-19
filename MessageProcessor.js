@@ -12,7 +12,7 @@ var EDIT_TIMEOUT = 2000;
 var NEWM_TIMEOUT = 5000;
 
 exports.processMessage = function (update_id, msg) {
-    console.log('Processing message '+update_id+', message id '+msg.message_id+ ', from '+msg.from.username+' '+msg.from.id);
+    //console.log('Processing message '+update_id+', message id '+msg.message_id+ ', from '+msg.from.username+' '+msg.from.id);
     var s;
 
     // Checking for special commands from administrator
@@ -494,7 +494,7 @@ function sendStats(id) {
         else {
             s += host + ': No data available.\n\n';
         }
-    })
+    });
 
     nba.sendMessage(id, s.toString('utf8'));
 }

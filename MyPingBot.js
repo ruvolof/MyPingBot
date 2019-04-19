@@ -10,6 +10,7 @@ var check_login = function(botData) {
     } else {
         console.log('Successfully connected to bot ' + botData.username + ' with id ' + botData.id + '.');
         // Loading server list and start monitor, this same function will start the updates loop
+        nba.startUpdatesLoop();
         monitor.startMonitor(true);
     }
 };
