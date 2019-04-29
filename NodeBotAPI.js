@@ -157,12 +157,12 @@ exports.sendMessage = function (chat, text, keyboard, web_preview) {
     if (keyboard == undefined) {
         https.get(APIURL+TOKEN+'/sendMessage?chat_id='+chat+'&text='+encodeURIComponent(text)+'&disable_web_page_preview='+web_preview, consumeRes)
             .on('error', (err) => {
-                console.error(e);
+                console.error(err);
             });
     } else {
         https.get(APIURL+TOKEN+'/sendMessage?chat_id='+chat+'&text='+encodeURIComponent(text)+'&reply_markup='+encodeURIComponent(keyboard)+'&disable_web_page_preview='+web_preview, consumeRes)
             .on('error', (err) => {
-                console.error(e);
+                console.error(err);
             });
     }
 };
