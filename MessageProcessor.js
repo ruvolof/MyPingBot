@@ -1,23 +1,22 @@
 var dns = require('dns');
 var net = require('net');
 var fs = require('fs');
-var nba = require('./NodeBotAPI.js');
 var monitor = require('./Monitor.js');
 var config = require('./config');
 var ping = require('./node_modules/ping');
 var admin = require('./Admin.js');
 
 var adminmode = false;
-var EDIT_TIMEOUT = 2000;
-var NEWM_TIMEOUT = 5000;
+var EDIT_TIMEOUT = 1000;
+var NEWM_TIMEOUT = 1000;
 
-exports.processMessage = function (update_id, msg) {
-    //console.log('Processing message '+update_id+', message id '+msg.message_id+ ', from '+msg.from.username+' '+msg.from.id);
+exports.processMessage = function (msg) {
+    //console.log('Processing message '+update_id+', message id '+msg.message.text_id+ ', from '+msg.from.username+' '+msg.from.id);
     var s;
 
     // Checking for special commands from administrator
     if (config.admin.indexOf(msg.from.id) != -1) {
-        if (/^\/maintenance\s*$/.test(msg.text)) {
+        if (/^\/maintenance\s*$/.test(msg.message.text)) {
             config.maintenance = !config.maintenance;
             if (config.maintenance) {
                 s = "Maintenance mode: ON";
@@ -25,10 +24,10 @@ exports.processMessage = function (update_id, msg) {
             else {
                 s = "Maintenance mode: OFF";
             }
-            nba.sendMessage(msg.from.id, s.toString('utf8'));
+            msg.reply(s.toString('utf8'));
             return;
         }
-        else if (/^\/adminmode\s*$/.test(msg.text)) {
+        else if (/^\/adminmode\s*$/.test(msg.message.text)) {
             adminmode = !adminmode;
             if (adminmode) {
                 s = "Admin mode: ON";
@@ -36,7 +35,7 @@ exports.processMessage = function (update_id, msg) {
             else {
                 s = "Admin mode: OFF";
             }
-            nba.sendMessage(msg.from.id, s.toString('utf8'));
+            msg.reply(s.toString('utf8'));
             return;
         }
     }
@@ -49,7 +48,7 @@ exports.processMessage = function (update_id, msg) {
     if (config.maintenance) {
         if (config.admin.indexOf(msg.from.id) == -1 && config.testers.indexOf(msg.from.id) == -1 && config.developers.indexOf(msg.from.id) == -1) {
             s = 'Currently under maintenance. Bot will reply only to developers and testers.';
-            nba.sendMessage(msg.from.id, s.toString('utf8'));
+            msg.reply(s.toString('utf8'));
             return;
         }
     }
@@ -67,8 +66,8 @@ exports.processMessage = function (update_id, msg) {
     else {
         if (msg.isEdit) {
             if ((Date.now() - servers_list[msg.from.id].last_access) < EDIT_TIMEOUT) {
-                s = "You're allowed to edit a message once every " + (EDIT_TIMEOUT / 1000) + " seconds. Too fast, retry.";
-                nba.sendMessage(msg.from.id, s.toString('utf8'));
+                s = "Your message rate is limited to " + (EDIT_TIMEOUT / 1000) + " per second. Too fast, retry.";
+                msg.reply(s.toString('utf8'));
                 return;
             }
             else {
@@ -77,8 +76,8 @@ exports.processMessage = function (update_id, msg) {
         }
         else {
             if ((Date.now() - servers_list[msg.from.id].last_access) < NEWM_TIMEOUT) {
-                s = "You're allowed to send a message once every " + (NEWM_TIMEOUT / 1000) + " seconds. Too fast, retry.";
-                nba.sendMessage(msg.from.id, s.toString('utf8'));
+                s = "Your message rate is limited to " + (NEWM_TIMEOUT / 1000) + " per second. Too fast, retry.";
+                msg.reply(s.toString('utf8'));
                 return;
             }
             else {
@@ -88,99 +87,100 @@ exports.processMessage = function (update_id, msg) {
     }
 
     // help
-    if (/^\/help\s*$/.test(msg.text)) {
-        help(msg.from.id);
+    if (/^\/help\s*$/.test(msg.message.text)) {
+        help(msg);
     }
 
     // start
-    else if (/^\/start\s*$/.test(msg.text)) {
-        start(msg.from.id);
+    else if (/^\/start\s*$/.test(msg.message.text)) {
+        start(msg);
     }
 
     // ping monitored
-    else if (/^\/pingservers\s*$/.test(msg.text)) {
-        pingServers(msg.from.id);
+    else if (/^\/pingservers\s*$/.test(msg.message.text)) {
+        pingServers(msg);
     }
 
     // ping HOST
-    else if (/^\/ping\s*/.test(msg.text)) {
-        pingHost(msg.from.id, msg.text);
+    else if (/^\/ping\s*/.test(msg.message.text)) {
+        pingHost(msg);
     }
 
     // addfavorite HOST
-    else if (/^\/addfavorite\s*/.test(msg.text)) {
-        addFavorite(msg.from.id, msg.text);
+    else if (/^\/addfavorite\s*/.test(msg.message.text)) {
+        addFavorite(msg);
     }
 
     // monitor HOST
-    else if (/^\/monitor\s*/.test(msg.text)) {
-        monitorHost(msg.from.id, msg.text);
+    else if (/^\/monitor\s*/.test(msg.message.text)) {
+        monitorHost(msg);
     }
 
     // unmonitor HOST
-    else if (/^\/remove\s*/.test(msg.text)) {
-        remove(msg.from.id, msg.text);
+    else if (/^\/remove\s*/.test(msg.message.text)) {
+        remove(msg);
     }
 
     // Retrieve list of monitored server
-    else if (/^\/listservers\s*$/.test(msg.text))   {
-        listServers(msg.from.id);
+    else if (/^\/listservers\s*$/.test(msg.message.text))   {
+        listServers(msg);
     }
 
     // host HOST
-    else if (/^\/host\s*/.test(msg.text)) {
-        getHost(msg.from.id, msg.text);
+    else if (/^\/host\s*/.test(msg.message.text)) {
+        getHost(msg);
     }
 
     // checkport HOST PORT
-    else if (/^\/checkport\s*/.test(msg.text)) {
-        checkPort(msg.from.id, msg.text);
+    else if (/^\/checkport\s*/.test(msg.message.text)) {
+        checkPort(msg);
     }
 
     // change announcements preference
-    else if (/^\/announcements\s*$/.test(msg.text)) {
-        setAnnouncements(msg.from.id);
+    else if (/^\/announcements\s*$/.test(msg.message.text)) {
+        setAnnouncements(msg);
     }
     
     // reset stats
-    else if (/^\/resetstats\s*/.test(msg.text)) {
-        resetStats(msg.from.id, msg.text);
+    else if (/^\/resetstats\s*/.test(msg.message.text)) {
+        resetStats(msg);
     }
 
     // print stats
-    else if (/^\/stats\s*$/.test(msg.text)) {
-        sendStats(msg.from.id);
+    else if (/^\/stats\s*$/.test(msg.message.text)) {
+        sendStats(msg);
     }
 
     else {
         s = "Type /help for a list of available commands.";
-        nba.sendMessage(msg.from.id, s.toString('utf8'));
+        msg.reply(s.toString('utf8'));
     }
 };
 
-function help(id) {
+function help(msg) {
     fs.readFile(__dirname + '/help_message.txt', function (err, data) {
         if (err) {
             console.log(err);
         }
         else {
-            nba.sendMessage(id, data.toString('utf8'));
+            msg.reply(data.toString('utf8'));
         }
     });
 }
 
-function start(id) {
+function start(msg) {
     fs.readFile(__dirname + '/start_message.txt', function (err, data) {
         if (err) {
             console.log(err);
         }
         else {
-            nba.sendMessage(id, data.toString('utf8'));
+            msg.reply(data.toString('utf8'));
         }
     });
 }
 
-function pingServers(id) {
+function pingServers(msg) {
+    var id = msg.from.id;
     var hosts = Object.keys(servers_list[id].hosts).concat(Object.keys(servers_list[id].favorites));
     var host_total = hosts.length;
     var host_count = 0;
@@ -210,40 +210,40 @@ function pingServers(id) {
                     else {
                         s = "Alive servers:\n" + alive.join("\n") + "\n\nDead servers:\n" + dead.join("\n");
                     }
-                    nba.sendMessage(id, s.toString('utf8'));
+                    msg.reply(s.toString('utf8'));
                 }
             });
     })
 }
 
-function pingHost(id, text) {
+function pingHost(msg) {
     var host;
     var s;
     var re_args = /^\/ping\s+([\.:\/a-z0-9]+)$/g;
-    var m = re_args.exec(text);
+    var m = re_args.exec(msg.message.text);
 
     if (m != null && m.length == 2) {
         host = m[1];
         ping.promise.probe(host)
             .then (function (res) {
                 if (res.alive) {
-                    nba.sendMessage(id, res.output.toString('utf8'));
+                    msg.reply(res.output.toString('utf8'));
                 }
                 else {
                     s = "Host " + host + " is dead.";
-                    nba.sendMessage(id, s.toString('utf8'));
+                    msg.reply(s.toString('utf8'));
                 }
             });
     }
     else {
         s = "/ping needs a parameter.";
-        nba.sendMessage(id, s.toString('utf8'));
+        msg.reply(s.toString('utf8'));
     }
 }
 
-function addFavorite(id, text) {
+function addFavorite(msg) {
     var re_args = /^\/addfavorite\s+([\.:\/a-z0-9]+)$/ig;
-    var m = re_args.exec(text);
+    var m = re_args.exec(msg.message.text);
     var host;
     var s;
 
@@ -252,21 +252,21 @@ function addFavorite(id, text) {
 
         if (m[1] == "localhost" || m[1] == "127.0.0.1") {
             s = "Won't add localhost to favorites. Skipping.";
-            nba.sendMessage(id, s.toString('utf8'));
+            msg.reply(s.toString('utf8'));
             return;
         }
 
-        monitor.addToFavoriteServersList(host.toLowerCase(), id);
+        monitor.addToFavoriteServersList(host.toLowerCase(), msg);
     }
     else {
         s = "/addfavorite needs an host.";
-        nba.sendMessage(id, s.toString('utf8'));
+        msg.reply(s.toString('utf8'));
     }
 }
 
-function monitorHost(id, text) {
+function monitorHost(msg) {
     var re_args = /^\/monitor\s+([\.:\/a-z0-9]+)$/ig;
-    var m = re_args.exec(text);
+    var m = re_args.exec(msg.message.text);
     var host;
     var s;
 
@@ -275,35 +275,36 @@ function monitorHost(id, text) {
 
         if (m[1] == "localhost" || m[1] == "127.0.0.1") {
             s = "Won't monitor localhost. Skipping.";
-            nba.sendMessage(id, s.toString('utf8'));
+            msg.reply(s.toString('utf8'));
             return;
         }
 
-        monitor.addToServersList(host.toLowerCase(), id);
+        monitor.addToServersList(host.toLowerCase(), msg);
     }
     else {
         s = "/monitor needs a parameter.";
-        nba.sendMessage(id, s.toString('utf8'));
+        msg.reply(s.toString('utf8'));
     }
 }
 
-function remove(id, text) {
+function remove(msg) {
     var re_args = /^\/remove\s+([\.:\/a-z0-9]+)$/ig;
-    var m = re_args.exec(text);
+    var m = re_args.exec(msg.message.text);
     var host;
     var s;
 
     if (m != null && m.length == 2) {
         host = m[1];
-        monitor.removeFromServersList(host.toLowerCase(), id);
+        monitor.removeFromServersList(host.toLowerCase(), msg);
     }
     else {
         s = "/remove needs a parameter.";
-        nba.sendMessage(id, s.toString('utf8'));
+        msg.reply(s.toString('utf8'));
     }
 }
 
-function listServers(id) {
+function listServers(msg) {
+    var id = msg.from.id;
     var hosts = Object.keys(servers_list[id].hosts);
     var favorites = Object.keys(servers_list[id].favorites);
     var s;
@@ -320,12 +321,12 @@ function listServers(id) {
         s = "Monitored servers:\n" + hosts.join("\n") + "\n\nFavorites:\n" + favorites.join("\n");
     }
 
-    nba.sendMessage(id, s.toString('utf8'));
+    msg.reply(s.toString('utf8'));
 }
 
-function getHost(id, text) {
+function getHost(msg) {
     var re_args = /^\/host\s+([\.:\/a-z0-9]+)$/ig;
-    var m = re_args.exec(text);
+    var m = re_args.exec(msg.message.text);
     var host;
     var s;
 
@@ -336,14 +337,14 @@ function getHost(id, text) {
                 if (err) {
                     s = "Unable to reverse resolve " + host + ".";
                     console.log(s);
-                    nba.sendMessage(id, s.toString('utf8'));
+                    msg.reply(s.toString('utf8'));
                 }
                 else {
                     s = '';
                     hostnames.forEach(function (hostname) {
                         s += host + " resolved to " + hostname + "\n";
                     });
-                    nba.sendMessage(id, s.toString('utf8'));
+                    msg.reply(s.toString('utf8'));
                 }
             })
         } else {
@@ -354,40 +355,40 @@ function getHost(id, text) {
             dns.lookup(host, options, function (err, addresses) {
                 if (err) {
                     s = "Couldn't resolve hostname " + host + ". Skipping.";
-                    nba.sendMessage(id, s.toString('utf8'));
+                    msg.reply(s.toString('utf8'));
                 }
                 else {
                     s = '';
                     addresses.forEach(function (address) {
                         s += host + " has IPv" + address.family + " address " + address.address + "\n";
                     });
-                    nba.sendMessage(id, s.toString('utf8'));
+                    msg.reply(s.toString('utf8'));
                 }
             });
         }
     }
     else {
         s = "/host needs a parameter.";
-        nba.sendMessage(id, s.toString('utf8'));
+        msg.reply(s.toString('utf8'));
     }
 }
 
-function checkPort(id, text) {
+function checkPort(msg) {
     var re_args = /^\/checkport\s+([\.:\/a-z0-9]+)\s+([0-9]+)$/ig;
-    var m = re_args.exec(text);
+    var m = re_args.exec(msg.message.text);
     var s;
     var c;
 
     if (m != null && m.length == 3) {
         if (m[2] < 1 || m[2] > 65535) {
             s = m[2] + " isn't a valid port number.";
-            nba.sendMessage(id, s.toString('utf8'));
+            msg.reply(s.toString('utf8'));
             return;
         }
 
         if (m[1] == "localhost" || m[1] == "127.0.0.1") {
-            s = "Skipping scan of localhost.";
-            nba.sendMessage(id, s.toString('utf8'));
+            s = "Can't scan localhost.";
+            msg.reply(s.toString('utf8'));
             return;
         }
 
@@ -400,7 +401,7 @@ function checkPort(id, text) {
 
         c.on('connect', function () {
             s = "Port " + m[2] + " on " + m[1] + " is OPEN.";
-            nba.sendMessage(id, s.toString('utf8'));
+            msg.reply(s.toString('utf8'));
             c.end();
         });
 
@@ -411,22 +412,23 @@ function checkPort(id, text) {
             else {
                 s = "Port " + err.port + " on " + err.address + " is CLOSED.";
             }
-            nba.sendMessage(id, s.toString('utf8'));
+            msg.reply(s.toString('utf8'));
             c.destroy();
         });
 
         c.on('timeout', function () {
             s = "A timeout occurred, this might be because the port is closed.";
-            nba.sendMessage(id, s.toString('utf8'));
+            msg.reply(s.toString('utf8'));
         })
     }
     else {
         s = "/checkport needs two parameters: hostaname and port.";
-        nba.sendMessage(id, s.toString('utf8'));
+        msg.reply(s.toString('utf8'));
     }
 }
 
-function setAnnouncements(id) {
+function setAnnouncements(msg) {
+    var id = msg.from.id;
     var s;
     servers_list[id].announcements = !servers_list[id].announcements;
     if (servers_list[id].announcements) {
@@ -435,12 +437,13 @@ function setAnnouncements(id) {
     else {
         s = "Announcements: OFF";
     }
-    nba.sendMessage(id, s.toString('utf8'));
+    msg.reply(s.toString('utf8'));
 }
 
-function resetStats(id, text) {
+function resetStats(msg) {
+    var id = msg.from.id;
     var re_args = /^\/resetstats\s+([\.:\/a-z0-9]+)$/ig;
-    var m = re_args.exec(text);
+    var m = re_args.exec(msg.message.text);
     var s;
     var hosts;
     var arg;
@@ -476,10 +479,11 @@ function resetStats(id, text) {
 
 
 
-    nba.sendMessage(id, s.toString('utf8'));
+    msg.reply(s.toString('utf8'));
 }
 
-function sendStats(id) {
+function sendStats(msg) {
+    var id = msg.from.id;
     var s = '';
     var hosts = Object.keys(servers_list[id].hosts);
     hosts.forEach(function (host) {
@@ -496,5 +500,5 @@ function sendStats(id) {
         }
     });
 
-    nba.sendMessage(id, s.toString('utf8'));
+    msg.reply(s.toString('utf8'));
 }

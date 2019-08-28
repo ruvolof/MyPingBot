@@ -1,5 +1,4 @@
 var fs = require('fs');
-var nba = require('./NodeBotAPI.js');
 var monitor = require('./Monitor.js');
 
 var bmsg;
@@ -7,42 +6,42 @@ var bmsg;
 exports.processAdminMessage = function(msg) {
     var s;
 
-    if (/^\/help\s*$/.test(msg.text)) {
-        adminHelp(msg.from.id);
+    if (/^\/help\s*$/.test(msg.message.text)) {
+        adminHelp(msg);
     }
-    else if (/^\/stats\s*$/.test(msg.text)) {
-        getStats(msg.from.id);
+    else if (/^\/stats\s*$/.test(msg.message.text)) {
+        getStats(msg);
     }
-    else if (/^\/broadcast\s*/.test(msg.text)) {
-        setBroadcastMessage(msg.from.id, msg.text);
+    else if (/^\/broadcast\s*/.test(msg.message.text)) {
+        setBroadcastMessage(msg);
     }
-    else if (/^\/confirmBroadcast\s*$/.test(msg.text)) {
-        sendBroadcast(msg.from.id);
+    else if (/^\/confirmBroadcast\s*$/.test(msg.message.text)) {
+        sendBroadcast(msg);
     }
-    else if(/^\/dumpStatus\s*$/.test(msg.text)) {
+    else if(/^\/dumpStatus\s*$/.test(msg.message.text)) {
         dumpStatus();
     }
-    else if (/^\/manualCheck\s*/.test(msg.text)) {
-        manualCheck();
+    else if (/^\/manualCheck\s*/.test(msg.message.text)) {
+        manualCheck(msg);
     }
     else {
         s = "Unavailable command. Type /help or exit admin mode.";
-        nba.sendMessage(msg.from.id, s.toString('utf8'));
+        msg.reply(s.toString('utf8'));
     }
 };
 
-function adminHelp(id) {
+function adminHelp(msg) {
     fs.readFile(__dirname + '/admin_help_message.txt', function (err, data) {
         if (err) {
             console.log(err);
         }
         else {
-            nba.sendMessage(id, data.toString('utf8'));
+            msg.reply(data.toString('utf8'));
         }
     });
 }
 
-function getStats(id) {
+function getStats(msg) {
     var users;
     var hosts = 0;
     var bookmarks = 0;
@@ -59,12 +58,13 @@ function getStats(id) {
     s += "Monitor count: " + hosts + "\n";
     s += "Bookmark count: " + bookmarks + "\n";
 
-    nba.sendMessage(id, s.toString('utf8'));
+    msg.reply(s.toString('utf8'));
 }
 
-function setBroadcastMessage(id, cmd) {
+function setBroadcastMessage(msg) {
     var s;
-    var text = cmd.indexOf(' ') != -1 ? cmd.substr(cmd.indexOf(' ') + 1) : "";
+    var command = msg.message.text;
+    var text = command.indexOf(' ') != -1 ? command.substr(command.indexOf(' ') + 1) : "";
 
     if (text != "") {
         bmsg = text;
@@ -76,10 +76,10 @@ function setBroadcastMessage(id, cmd) {
         s = "No message found. Usage: /broadcast whatever you want.";
     }
 
-    nba.sendMessage(id, s.toString('utf8'));
+    msg.reply(s.toString('utf8'));
 }
 
-function sendBroadcast(id) {
+function sendBroadcast(msg) {
     var users = Object.keys(servers_list);
     var count = 0;
     var s;
@@ -87,7 +87,7 @@ function sendBroadcast(id) {
         users.forEach(function (user) {
             if (servers_list[user].announcements) {
                 count++;
-                nba.sendMessage(user, bmsg.toString('utf8'));
+                msg.telegram.sendMessage(user, bmsg.toString('utf8'));
             }
         });
         s = "The message has been sent to " + count + " users.";
@@ -96,7 +96,7 @@ function sendBroadcast(id) {
     else {
         s = "No message has been set. Use /broadcast to set it.";
     }
-    nba.sendMessage(id, s.toString('utf8'));
+    msg.reply(s.toString('utf8'));
 }
 
 function dumpStatus() {

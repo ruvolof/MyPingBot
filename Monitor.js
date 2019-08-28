@@ -1,6 +1,5 @@
-var fs = require('fs');
-var dns = require('dns');
-var nba = require('./NodeBotAPI.js');
+const fs = require('fs');
+const dns = require('dns');
 var ping = require('./node_modules/ping');
 var jsonfile = require('./node_modules/jsonfile');
 
@@ -12,6 +11,7 @@ var CHECK_INTERVAL = 300000;
 var SAVE_INTERVAL = CHECK_INTERVAL * 4;
 var FAIL_BEFORE_NOTIFICATION = 2;
 
+var tg = null;
 servers_list = {};
 
 function hasReachedMax(user_id) {
@@ -19,23 +19,24 @@ function hasReachedMax(user_id) {
     return count >= MAX_MON;
 }
 
-exports.addToServersList = function (host, chat_id) {
+exports.addToServersList = function (host, msg) {
+    var chat_id = msg.from.id;
     var s;
     // Checking if the user is already monitoring the host.
     if (servers_list[chat_id].hosts.hasOwnProperty(host)) {
         s = "You're already monitoring " + host + ".";
-        nba.sendMessage(chat_id, s.toString('utf8'));
+        msg.reply(toString('utf8'));
     }
     // Checking if the user is monitoring more than MAX_MON hosts.
     else if (hasReachedMax(chat_id)) {
         s = "You're already monitoring " + MAX_MON + " hosts. Maximum reached.";
-        nba.sendMessage(chat_id, s.toString('utf8'));
+        msg.reply(s.toString('utf8'));
     }
     else {
         dns.lookup(host, function(err) {
             if (err) {
                 s = "Couldn't resolve hostname " + host + ". Skipping.";
-                nba.sendMessage(chat_id, s.toString('utf8'));
+                msg.reply(s.toString('utf8'));
             }
             else {
                 servers_list[chat_id].hosts[host] = {
@@ -49,11 +50,11 @@ exports.addToServersList = function (host, chat_id) {
                     if (err) {
                         console.error(err.message);
                         s = "Your host has been added, but an error may have occurred while storing your preference.";
-                        nba.sendMessage(chat_id, s.toString('utf8'));
+                        msg.reply(s.toString('utf8'));
                     }
                     else {
                         s = "Host added correctly. You'll get a notification if it goes down.";
-                        nba.sendMessage(chat_id, s.toString('utf8'));
+                        msg.reply(s.toString('utf8'));
                     }
                 })
             }
@@ -61,22 +62,23 @@ exports.addToServersList = function (host, chat_id) {
     }
 };
 
-exports.addToFavoriteServersList = function (host, chat_id) {
+exports.addToFavoriteServersList = function (host, msg) {
+    var chat_id = msg.from.id;
     var s;
     // Checking if the user is already monitoring the host.
     if (servers_list[chat_id].favorites.hasOwnProperty(host)) {
         s = host + " is already in your favorites.";
-        nba.sendMessage(chat_id, s.toString('utf8'));
+        msg.reply(s.toString('utf8'));
     }
     else if (servers_list[chat_id].hosts.hasOwnProperty(host)) {
         s = "You are currently monitoring " + host + ". No reason to add to favorites.";
-        nba.sendMessage(chat_id, s.toString('utf8'));
+        msg.reply(s.toString('utf8'));
     }
     else {
         dns.lookup(host, function(err) {
             if (err) {
                 s = "Couldn't resolve hostname " + host + ". Skipping.";
-                nba.sendMessage(chat_id, s.toString('utf8'));
+                msg.reply(s.toString('utf8'));
             }
             else {
                 servers_list[chat_id].favorites[host] = 1;
@@ -84,11 +86,11 @@ exports.addToFavoriteServersList = function (host, chat_id) {
                     if (err) {
                         console.error(err.message);
                         s = "Your host has been added, but an error may have occurred while storing your preference.";
-                        nba.sendMessage(chat_id, s.toString('utf8'));
+                        msg.reply(s.toString('utf8'));
                     }
                     else {
                         s = "Host added correctly.";
-                        nba.sendMessage(chat_id, s.toString('utf8'));
+                        msg.reply(s.toString('utf8'));
                     }
                 })
             }
@@ -96,7 +98,8 @@ exports.addToFavoriteServersList = function (host, chat_id) {
     }
 };
 
-exports.removeFromServersList = function (host, chat_id) {
+exports.removeFromServersList = function (host, msg) {
+    var chat_id = msg.from.id;
     var s;
     var modified = false;
     if (host == "ALL" || host == "all") {
@@ -117,7 +120,7 @@ exports.removeFromServersList = function (host, chat_id) {
     }
     else {
         s = "You're not either monitoring " + host + " or have it in your favorites list. Can't remove it.";
-        nba.sendMessage(chat_id, s.toString('utf8'));
+        msg.reply(s.toString('utf8'));
     }
 
     if (modified) {
@@ -125,10 +128,10 @@ exports.removeFromServersList = function (host, chat_id) {
             if (err) {
                 console.log(err.message);
                 s += " But an error occurred while saving the operation. It might get back on your list upon reboot.";
-                nba.sendMessage(chat_id, s.toString('utf8'));
+                msg.reply(s.toString('utf8'));
             }
             else {
-                nba.sendMessage(chat_id, s.toString('utf8'));
+                msg.reply(s.toString('utf8'));
             }
         })
     }
@@ -173,6 +176,7 @@ function delayedCheck(user, host) {
 */
 
 function checkServers() {
+    console.log("check executed");
     var s;
     var users = Object.keys(servers_list);
     users.forEach(function (user) {
@@ -184,7 +188,7 @@ function checkServers() {
                     if (res.alive) {
                         if (servers_list[user].hosts[host].alive == false) {
                             s = "Host " + host + " is back online.";
-                            nba.sendMessage(user, s.toString('utf8'));
+                            tg.sendMessage(user, s.toString('utf8'));
                         }
                         servers_list[user].hosts[host].consecutive_fails = 0;
                         servers_list[user].hosts[host].alive = true;
@@ -196,7 +200,7 @@ function checkServers() {
                             if (servers_list[user].hosts[host].alive == true) {
                                 s = "Host " + host + " is dead.";
                                 console.log(s + " Sending notification to " + servers_list[user].username + ": " + user);
-                                nba.sendMessage(user, s.toString('utf8'));
+                                tg.sendMessage(user, s.toString('utf8'));
                             }
                             servers_list[user].hosts[host].alive = false;
                         }
@@ -225,7 +229,8 @@ exports.manualCheck = function () {
     checkServers();
 };
 
-exports.startMonitor = function (autosave) {
+exports.startMonitor = function (telegram, autosave) {
+    tg = telegram;
     loadServersList();
     checkServers();
     setInterval(checkServers, CHECK_INTERVAL);

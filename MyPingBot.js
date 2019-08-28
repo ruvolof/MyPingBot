@@ -1,18 +1,9 @@
-var nba = require('./NodeBotAPI.js');
-var monitor = require('./Monitor.js');
+const monitor = require('./Monitor.js');
+const mp = require('./MessageProcessor.js');
+const config = require('./config.js');
+const Telegraf = require('telegraf');
+const bot = new Telegraf(config.TOKEN);
 
-console.log('MyPingBot manager started.');
-
-// Connect to the bot and start the main loop to get messages from API
-var check_login = function(botData) {
-    if (!botData) {
-        console.log('Unable to connect to Bot API.');
-    } else {
-        console.log('Successfully connected to bot ' + botData.username + ' with id ' + botData.id + '.');
-        // Loading server list and start monitor, this same function will start the updates loop
-        nba.startUpdatesLoop();
-        monitor.startMonitor(true);
-    }
-};
-
-nba.getMe(check_login);
+bot.on('message', (ctx) => mp.processMessage(ctx));
+bot.launch();
+monitor.startMonitor(bot.telegram);
