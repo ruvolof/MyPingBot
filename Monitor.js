@@ -176,7 +176,6 @@ function delayedCheck(user, host) {
 */
 
 function checkServers() {
-    console.log("check executed");
     var s;
     var users = Object.keys(servers_list);
     users.forEach(function (user) {
