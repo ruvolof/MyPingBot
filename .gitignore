@@ -28,3 +28,5 @@ node_modules
 
 servers.json
 upload_to_production.sh
+.Rhistory
+package-lock.json

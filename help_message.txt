@@ -1,7 +1,3 @@
-MyPingBot is a free and opensource software.
-
-You can find its source code on Github at https://github.com/ruvolof/MyPingBot. Please, report any bug on Github.
-
 Commands:
 
 /help   Show this help message.
@@ -21,3 +17,5 @@ Restrictions:
 
 - Message rate is limited to 1 per second.
 - You're allowed to monitor up to 10 hosts.
+
+MyPingBot source code is available on GitHub at https://github.com/ruvolof/MyPingBot.
