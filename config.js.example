@@ -1,0 +1,9 @@
+var config = {
+  TOKEN: "TOKEN",
+  maintenance: false,
+  admin: [],
+  developers: [],
+  testers: [],
+};
+
+module.exports = config;
