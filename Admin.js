@@ -22,8 +22,9 @@ exports.processAdminMessage = function(msg) {
     listUsers(msg);
   } else if (/^\/listServers\s*[0-9a-zA-Z]*/.test(msg.message.text)) {
     listServersByUsers(msg);
-  }
-  else {
+  } else if (/^\/removeUser\s*[0-9a-zA-Z]*/.test(msg.message.text)) {
+    removeUser(msg);
+  } else {
     s = "Unavailable command. Type /help or exit admin mode.";
     msg.reply(s.toString('utf8'));
   }
@@ -127,10 +128,20 @@ function getUserObjectByUsername(username) {
   return null;
 }
 
+function getTelegramIdByUsername(username) {
+  const keys = Object.keys(servers_list);
+  for (let key of keys) {
+    if (servers_list[key].username === username) {
+      return key;
+    }
+  }
+  return null;
+}
+
 function listServersByUsers(msg) {
   const args = msg.message.text.split(' ');
   if (args.length === 2) {
-    const username = msg.message.text.split(' ')[1];
+    const username = args[1];
     const user = getUserObjectByUsername(username);
     if (user != null) {
       msg.reply(username + ' currently monitors:\n'
@@ -138,6 +149,24 @@ function listServersByUsers(msg) {
     }
     else {
       msg.reply('Username not found. /listUsers');
+    }
+  }
+  else {
+    msg.reply('Specify an username. /listUsers');
+  }
+}
+
+function removeUser(msg) {
+  const args = msg.message.text.split(' ');
+  if (args.length === 2) {
+    const username = args[1];
+    const user_id = getTelegramIdByUsername(username);
+    if (user_id != null) {
+      delete servers_list[user_id];
+      msg.reply('User ' + username + ' removed.');
+    }
+    else {
+      msg.reply('User ' + username + ' not found.');
     }
   }
   else {
