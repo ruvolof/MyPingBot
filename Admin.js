@@ -18,6 +18,8 @@ exports.processAdminMessage = function(msg) {
     dumpStatus();
   } else if (/^\/manualCheck\s*/.test(msg.message.text)) {
     manualCheck(msg);
+  } else if (/^\/listUsers\s*/.test(msg.message.text)) {
+    listUsers(msg);
   } else {
     s = "Unavailable command. Type /help or exit admin mode.";
     msg.reply(s.toString('utf8'));
@@ -98,4 +100,16 @@ function dumpStatus() {
 
 function manualCheck() {
   monitor.manualCheck();
+}
+
+function listUsers(msg) {
+  const usernames = [];
+  const keys = Object.keys(servers_list);
+  for (let key of keys) {
+    usernames.push(
+      servers_list[key].username + 
+      ': ' + new Date(servers_list[key].last_access).toLocaleString());
+  }
+  usernames.sort();
+  msg.reply('Usernames:\n' + usernames.join('\n'))
 }

@@ -1,8 +1,9 @@
 Commands:
 
-/help   Show this help message.
-/stats  Show bot statistics.
-/broadcast  Send a message to all users.
+/help Show this help message.
+/stats Show bot statistics.
+/broadcast Send a message to all users.
 /manualCheck Run the monitor check routine manually.
 /dumpStatus Dump on console the servers_list object.
-/adminmode  Exits admin mode.
+/listUsers Show list of active users.
+/adminmode Exits admin mode.

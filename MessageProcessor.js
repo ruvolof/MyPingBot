@@ -11,11 +11,11 @@ var EDIT_TIMEOUT = 1000;
 var NEWM_TIMEOUT = 1000;
 
 exports.processMessage = function(msg) {
-  //console.log('Processing message '+update_id+', message id '+msg.message.text_id+ ', from '+msg.from.username+' '+msg.from.id);
+  
   var s;
 
   // Checking for special commands from administrator
-  if (config.admin.indexOf(msg.from.id) != -1) {
+  if (config.admins.indexOf(msg.from.id) != -1) {
     if (/^\/maintenance\s*$/.test(msg.message.text)) {
       config.maintenance = !config.maintenance;
       if (config.maintenance) {
@@ -37,13 +37,13 @@ exports.processMessage = function(msg) {
     }
   }
 
-  if (adminmode && config.admin.indexOf(msg.from.id) != -1) {
+  if (adminmode && config.admins.indexOf(msg.from.id) != -1) {
     admin.processAdminMessage(msg);
     return;
   }
 
   if (config.maintenance) {
-    if (config.admin.indexOf(msg.from.id) == -1 &&
+    if (config.admins.indexOf(msg.from.id) == -1 &&
         config.testers.indexOf(msg.from.id) == -1 &&
         config.developers.indexOf(msg.from.id) == -1) {
       s = 'Currently under maintenance. ' +
