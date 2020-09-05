@@ -142,12 +142,12 @@ exports.removeFromServersList = function(host, msg) {
 };
 
 function loadServersList() {
-  console.log('Loading servers list.');
+  console.log(`${Date()} - Loading servers list.`);
   servers_list = {};
 
   try {
     servers_list = jsonfile.readFileSync(SERVERSFILE_PATH);
-    console.log(SERVERSFILE_NAME + " loaded correctly.");
+    console.log(`${Date()} - ${SERVERSFILE_NAME} loaded correctly.`);
   } catch (err) {
     console.error(err.message);
   }
@@ -205,9 +205,9 @@ exports.manualCheck = function() {
 exports.startMonitor = function(telegram, autosave) {
   tg = telegram;
   loadServersList();
+  console.log(`${Date()} - Starting monitor.`)
   checkServers();
   setInterval(checkServers, CHECK_INTERVAL);
-
   if (autosave) {
     setInterval(saveStatus, SAVE_INTERVAL);
   }
