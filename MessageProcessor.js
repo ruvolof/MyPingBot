@@ -232,15 +232,18 @@ function addFavorite(msg) {
 
 function monitorHost(msg) {
   var re_args = /^\/monitor\s+([\.:\/a-z0-9]+)$/ig;
-  var m = re_args.exec(msg.message.text);
+  var matches = re_args.exec(msg.message.text);
   var host;
   var s;
 
-  if (m != null && m.length == 2) {
-    host = m[1];
+  if (matches != null && matches.length == 2) {
+    host = matches[1];
 
-    if (m[1] == "localhost" || m[1] == "127.0.0.1") {
-      s = "Won't monitor localhost. Skipping.";
+    if (host == "localhost" 
+        || host == "127.0.0.1"
+        || host.startsWith('10.')
+        || host.startsWith('192.168.')) {
+      s = "Won't monitor local networks. Skipping.";
       msg.reply(s.toString('utf8'));
       return;
     }
@@ -430,8 +433,6 @@ function resetStats(msg) {
   } else {
     s = "/resetstats needs a parameter. Type \"all\" for all hosts.";
   }
-
-
 
   msg.reply(s.toString('utf8'));
 }
