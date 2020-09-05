@@ -1,7 +1,7 @@
-var fs = require('fs');
-var monitor = require('./Monitor.js');
+const fs = require('fs');
+const monitor = require('./Monitor.js');
 
-var bmsg;
+var broadcast_msg;
 
 exports.processAdminMessage = function(msg) {
   var s;
@@ -61,38 +61,37 @@ function getStats(msg) {
 }
 
 function setBroadcastMessage(msg) {
-  var s;
-  var command = msg.message.text;
-  var text = command.indexOf(' ') != -1 ? command.substr(command.indexOf(' ') + 1) : "";
-
-  if (text != "") {
-    bmsg = text;
-    s = "This message will be sent to all users:\n\n";
-    s += "\"" + bmsg + "\"";
-    s += "\n\nClick /confirmBroadcast to confirm.";
+  let args = msg.message.text.split(' ');
+  let response_text;
+  if (args.length > 1) {
+    broadcast_msg = args.slice(1).join(' ');
+    response_text = "This message will be sent to all users:\n\n";
+    response_text += "\"" + broadcast_msg + "\"";
+    response_text += "\n\nClick /confirmBroadcast to confirm.";
   } else {
-    s = "No message found. Usage: /broadcast whatever you want.";
+    response_text = "No message found. Usage: /broadcast whatever you want.";
   }
 
   msg.reply(s.toString('utf8'));
 }
 
 function sendBroadcast(msg) {
-  var users = Object.keys(servers_list);
-  var count = 0;
-  var s;
-  if (bmsg != "") {
+  let users = Object.keys(servers_list);
+  let count = 0;
+  let response_text;
+  if (broadcast_msg != "") {
     users.forEach(function(user) {
       if (servers_list[user].announcements) {
         count++;
-        msg.telegram.sendMessage(user, bmsg.toString('utf8'));
+        msg.telegram.sendMessage(user, broadcast_msg.toString('utf8'));
       }
     });
-    s = "The message has been sent to " + count + " users.";
-    bmsg = "";
+    response_text = "The message has been sent to " + count + " users.";
+    broadcast_msg = "";
   } else {
-    s = "No message has been set. Use /broadcast to set it.";
+    response_text = "No message has been set. Use /broadcast to set it.";
   }
+  
   msg.reply(s.toString('utf8'));
 }
 
