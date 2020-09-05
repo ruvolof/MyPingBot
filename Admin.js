@@ -8,23 +8,35 @@ exports.processAdminMessage = function(msg) {
 
   if (/^\/help\s*$/.test(msg.message.text)) {
     adminHelp(msg);
-  } else if (/^\/stats\s*$/.test(msg.message.text)) {
+  } 
+  else if (/^\/stats\s*$/.test(msg.message.text)) {
     getStats(msg);
-  } else if (/^\/broadcast\s*/.test(msg.message.text)) {
+  } 
+  else if (/^\/broadcast\s*/.test(msg.message.text)) {
     setBroadcastMessage(msg);
-  } else if (/^\/confirmBroadcast\s*$/.test(msg.message.text)) {
+  } 
+  else if (/^\/confirmBroadcast\s*$/.test(msg.message.text)) {
     sendBroadcast(msg);
-  } else if (/^\/dumpStatus\s*$/.test(msg.message.text)) {
+  } 
+  else if (/^\/dumpStatus\s*$/.test(msg.message.text)) {
     dumpStatus();
-  } else if (/^\/manualCheck\s*/.test(msg.message.text)) {
+  } 
+  else if (/^\/manualCheck\s*/.test(msg.message.text)) {
     manualCheck(msg);
-  } else if (/^\/listUsers\s*/.test(msg.message.text)) {
+  } 
+  else if (/^\/listUsers\s*/.test(msg.message.text)) {
     listUsers(msg);
-  } else if (/^\/listServers\s*[0-9a-zA-Z]*/.test(msg.message.text)) {
+  } 
+  else if (/^\/listServers\s*[0-9a-zA-Z]*/.test(msg.message.text)) {
     listServersByUsers(msg);
-  } else if (/^\/removeUser\s*[0-9a-zA-Z]*/.test(msg.message.text)) {
+  } 
+  else if (/^\/removeUser\s*[0-9a-zA-Z]*/.test(msg.message.text)) {
     removeUser(msg);
-  } else {
+  }
+  else if (/^\/removeHostFromUsername\s*.*/.test(msg.message.text)) {
+    removeHostFromUserMonitor(msg);
+  }
+  else {
     s = "Unavailable command. Type /help or exit admin mode.";
     msg.reply(s.toString('utf8'));
   }
@@ -170,5 +182,27 @@ function removeUser(msg) {
   }
   else {
     msg.reply('Specify an username. /listUsers');
+  }
+}
+
+function removeHostFromUserMonitor(msg) {
+  const args = msg.message.text.split(' ');
+  if (args.length === 3) {
+    const username = args[1];
+    const host = args[2];
+    const user = getUserObjectByUsername(username);
+    if (user == null) {
+      msg.reply('Unable to find user ' + username + '.');
+    }
+    else if (user.hosts.hasOwnProperty(host)) {
+      delete user.hosts[host];
+      msg.reply('Host ' + host + ' removed from ' + username + '.');
+    }
+    else {
+      msg.reply('Unable to find host ' + host + '.');
+    }
+  }
+  else {
+    msg.reply('Usage: removeHostFromUsername USERNAME HOST');
   }
 }

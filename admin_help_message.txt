@@ -8,4 +8,5 @@ Commands:
 /listUsers Show list of active users.
 /listServers USERNAME Shows servers monitored by USERNAME.
 /removeUser USERNAME Removes the user.
+/removeHostFromUsername USERNAME HOST Removes HOST from USERNAME monitor list.
 /adminmode Exits admin mode.
