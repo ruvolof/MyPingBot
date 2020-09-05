@@ -6,4 +6,5 @@ Commands:
 /manualCheck Run the monitor check routine manually.
 /dumpStatus Dump on console the servers_list object.
 /listUsers Show list of active users.
+/listServers USERNAME Shows servers monitored by USERNAME.
 /adminmode Exits admin mode.

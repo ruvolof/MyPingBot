@@ -20,7 +20,10 @@ exports.processAdminMessage = function(msg) {
     manualCheck(msg);
   } else if (/^\/listUsers\s*/.test(msg.message.text)) {
     listUsers(msg);
-  } else {
+  } else if (/^\/listServers\s*[0-9a-zA-Z]*/.test(msg.message.text)) {
+    listServersByUsers(msg);
+  }
+  else {
     s = "Unavailable command. Type /help or exit admin mode.";
     msg.reply(s.toString('utf8'));
   }
@@ -112,4 +115,32 @@ function listUsers(msg) {
   }
   usernames.sort();
   msg.reply('Usernames:\n' + usernames.join('\n'))
+}
+
+function getUserObjectByUsername(username) {
+  const keys = Object.keys(servers_list);
+  for (let key of keys) {
+    if (servers_list[key].username === username) {
+      return servers_list[key];
+    }
+  }
+  return null;
+}
+
+function listServersByUsers(msg) {
+  const args = msg.message.text.split(' ');
+  if (args.length === 2) {
+    const username = msg.message.text.split(' ')[1];
+    const user = getUserObjectByUsername(username);
+    if (user != null) {
+      msg.reply(username + ' currently monitors:\n'
+                + Object.keys(user.hosts).join('\n'));
+    }
+    else {
+      msg.reply('Username not found. /listUsers');
+    }
+  }
+  else {
+    msg.reply('Specify an username. /listUsers');
+  }
 }

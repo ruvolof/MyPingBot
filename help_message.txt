@@ -1,17 +1,17 @@
 Commands:
 
-/help   Show this help message.
-/ping HOST  Ping HOST.
-/host   HOST    If HOST is an hostname, resolve its address, if it's an IP reverse resolve it.
-/checkport HOST PORT    Check if PORT is open on HOST.
-/monitor HOST   Ping HOST every 5 minutes and send an alert if it's down.
-/addfavorite HOST   Add a bookmark for quick ping.
+/help Show this help message.
+/ping HOST Ping HOST.
+/host HOST If HOST is an hostname, resolve its address, if it's an IP reverse resolve it.
+/checkport HOST PORT Check if PORT is open on HOST.
+/monitor HOST Ping HOST every 5 minutes and send an alert if it's down.
+/addfavorite HOST Add a bookmark for quick ping.
 /remove HOST/ALL Remove HOST from your servers.
-/listservers    List all hosts in your monitor and favorites list.
-/pingservers  Ping all your favorite and monitored servers.
-/stats  Show stats for your monitored servers.
+/listservers List all hosts in your monitor and favorites list.
+/pingservers Ping all your favorite and monitored servers.
+/stats Show stats for your monitored servers.
 /resetstats HOST/ALL Reset all stats for your monitored servers.
-/announcements  Change your announcements preference.
+/announcements Change your announcements preference.
 
 Restrictions:
 
