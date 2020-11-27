@@ -43,6 +43,7 @@ exports.addToServersList = function(host, msg) {
           consecutive_fails: 0,
           total_pings: 0,
           failed_pings: 0,
+          ping_timestamps: [],
           last_stats_reset: Date.now()
         };
         jsonfile.writeFile(SERVERSFILE_PATH,
@@ -164,6 +165,12 @@ function checkServers() {
       ping.promise.probe(host)
         .then(function(res) {
           servers_list[user].hosts[host].total_pings++;
+          // TODO(cleanup): remove when hosts have been updated
+          if (!servers_list[user].hosts[host].hasOwnProperty('ping_timestamps')) {
+            servers_list[user].hosts[host].ping_timestamps = [];
+          }
+          // END cleanup
+          servers_list[user].hosts[host].ping_timestamps.push(+ new Date());
           if (res.alive) {
             if (servers_list[user].hosts[host].alive == false) {
               s = "Host " + host + " is back online.";

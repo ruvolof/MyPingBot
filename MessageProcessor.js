@@ -418,6 +418,7 @@ function resetStats(msg) {
         h.last_stats_reset = Date.now();
         h.total_pings = 0;
         h.failed_pings = 0;
+        h.ping_timestamps = [];
       });
       s = "All stats have been reset.";
     } else {
@@ -426,6 +427,7 @@ function resetStats(msg) {
         hosts.last_stats_reset = Date.now();
         hosts.total_pings = 0;
         hosts.failed_pings = 0;
+        hosts.ping_timestamps = [];
         s = "Stats for " + arg + " have been reset."
       } else {
         s = "Host " + arg + " not found.";
