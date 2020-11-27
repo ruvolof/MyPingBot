@@ -1,10 +1,11 @@
-var dns = require('dns');
-var net = require('net');
-var fs = require('fs');
-var monitor = require('./Monitor.js');
-var config = require('./config');
-var ping = require('./node_modules/ping');
-var admin = require('./Admin.js');
+const dns = require('dns');
+const net = require('net');
+const fs = require('fs');
+const monitor = require('./Monitor.js');
+const config = require('./config');
+const ping = require('./node_modules/ping');
+const admin = require('./Admin.js');
+const utils = require('./Utils.js');
 
 var adminmode = false;
 var EDIT_TIMEOUT = 1000;
@@ -54,7 +55,7 @@ exports.processMessage = function(msg) {
   }
 
   if (!servers_list.hasOwnProperty(msg.from.id)) {
-    console.log("New user found: " + msg.from.username + " " + msg.from.id);
+    utils.log(`New user found: ${msg.from.username} ${msg.from.id}`);
     servers_list[msg.from.id] = {
       username: msg.from.username,
       hosts: {},
@@ -75,7 +76,7 @@ exports.processMessage = function(msg) {
     } else {
       if ((Date.now() - servers_list[msg.from.id].last_access) < NEWM_TIMEOUT) {
         s = "Your message rate is limited to " +
-        (NEWM_TIMEOUT / 1000) + " per second. Too fast, retry.";
+            (NEWM_TIMEOUT / 1000) + " per second. Too fast, retry.";
         msg.reply(s.toString('utf8'));
         return;
       } else {
@@ -231,7 +232,7 @@ function addFavorite(msg) {
 }
 
 function monitorHost(msg) {
-  var re_args = /^\/monitor\s+([\.:\/a-z0-9]+)$/ig;
+  var re_args = /^\/monitor\s+([-\.:\/a-z0-9]+)$/ig;
   var matches = re_args.exec(msg.message.text);
   var host;
   var s;
@@ -300,8 +301,8 @@ function getHost(msg) {
       host = m[1];
       dns.reverse(host, function(err, hostnames) {
         if (err) {
-          s = "Unable to reverse resolve " + host + ".";
-          console.log(s);
+          s = `Unable to reverse resolve ${host}.`;
+          utils.log(s);
           msg.reply(s.toString('utf8'));
         } else {
           s = '';

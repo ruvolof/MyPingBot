@@ -1,15 +1,16 @@
 const fs = require('fs');
 const dns = require('dns');
-var ping = require('./node_modules/ping');
-var jsonfile = require('./node_modules/jsonfile');
+const ping = require('./node_modules/ping');
+const jsonfile = require('./node_modules/jsonfile');
+const utils = require('./Utils.js');
 
-var SERVERSFILE_NAME = 'servers.json';
-var SERVERSFILE_PATH = __dirname + '/' + SERVERSFILE_NAME;
+const SERVERSFILE_NAME = 'servers.json';
+const SERVERSFILE_PATH = __dirname + '/' + SERVERSFILE_NAME;
 
-var MAX_MON = 10;
-var CHECK_INTERVAL = 300000;
-var SAVE_INTERVAL = CHECK_INTERVAL * 4;
-var FAIL_BEFORE_NOTIFICATION = 2;
+const MAX_MON = 10;
+const CHECK_INTERVAL = 300000;
+const SAVE_INTERVAL = CHECK_INTERVAL * 4;
+const FAIL_BEFORE_NOTIFICATION = 2;
 
 var tg = null;
 servers_list = {};
@@ -142,12 +143,12 @@ exports.removeFromServersList = function(host, msg) {
 };
 
 function loadServersList() {
-  console.log(`${Date()} - Loading servers list.`);
+  utils.log('Loading servers list');
   servers_list = {};
 
   try {
     servers_list = jsonfile.readFileSync(SERVERSFILE_PATH);
-    console.log(`${Date()} - ${SERVERSFILE_NAME} loaded correctly.`);
+    utils.log(`${SERVERSFILE_NAME} loaded correctly.`);
   } catch (err) {
     console.error(err.message);
   }
@@ -173,11 +174,12 @@ function checkServers() {
           } else {
             servers_list[user].hosts[host].failed_pings++;
             servers_list[user].hosts[host].consecutive_fails++;
-            if (servers_list[user].hosts[host].consecutive_fails >= FAIL_BEFORE_NOTIFICATION) {
+            if (servers_list[user].hosts[host].consecutive_fails 
+                >= FAIL_BEFORE_NOTIFICATION) {
               if (servers_list[user].hosts[host].alive == true) {
-                s = "Host " + host + " is dead.";
-                console.log(s + " Sending notification to " +
-                  servers_list[user].username + ": " + user);
+                s = `Host ${host} is dead.`;
+                utils.log(`${s} Sending notification to ` +
+                          `${servers_list[user].username}: ${user}`);
                 tg.sendMessage(user, s.toString('utf8'));
               }
               servers_list[user].hosts[host].alive = false;
@@ -205,7 +207,7 @@ exports.manualCheck = function() {
 exports.startMonitor = function(telegram, autosave) {
   tg = telegram;
   loadServersList();
-  console.log(`${Date()} - Starting monitor.`)
+  utils.log('Starting monitor.')
   checkServers();
   setInterval(checkServers, CHECK_INTERVAL);
   if (autosave) {
