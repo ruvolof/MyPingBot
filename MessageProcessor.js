@@ -16,7 +16,7 @@ exports.processMessage = function(msg) {
   var s;
 
   // Checking for special commands from administrator
-  if (config.admins.indexOf(msg.from.id) != -1) {
+  if (config.admins.includes(msg.from.id)) {
     if (/^\/maintenance\s*$/.test(msg.message.text)) {
       config.maintenance = !config.maintenance;
       if (config.maintenance) {
@@ -38,15 +38,15 @@ exports.processMessage = function(msg) {
     }
   }
 
-  if (adminmode && config.admins.indexOf(msg.from.id) != -1) {
+  if (adminmode && config.admins.includes(msg.from.id)) {
     admin.processAdminMessage(msg);
     return;
   }
 
   if (config.maintenance) {
-    if (config.admins.indexOf(msg.from.id) == -1 &&
-        config.testers.indexOf(msg.from.id) == -1 &&
-        config.developers.indexOf(msg.from.id) == -1) {
+    if (config.admins.includes(msg.from.id) 
+        && config.testers.includes(msg.from.id)
+        && config.developers.includes(msg.from.id)) {
       s = 'Currently under maintenance. ' +
           'Bot will reply only to developers and testers.';
       msg.reply(s.toString('utf8'));
